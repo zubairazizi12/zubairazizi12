@@ -12,7 +12,7 @@ export function getSession() {
   });
   
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || 'demo-secret-key-for-hospital-system',
     store: mongoStore,
     resave: false,
     saveUninitialized: false,
