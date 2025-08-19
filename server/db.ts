@@ -19,7 +19,7 @@ export async function connectDB() {
     });
     console.log('Connected to MongoDB successfully');
   } catch (error) {
-    console.warn('MongoDB connection failed, using in-memory fallback:', error.message);
+    console.warn('MongoDB connection failed, using in-memory fallback:', (error as Error).message);
     // For demo purposes, we'll continue without a database connection
     // The application will still work for basic functionality
   }

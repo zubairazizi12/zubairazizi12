@@ -20,6 +20,7 @@ import {
   DEMO_CREDENTIALS,
 } from "@shared/schema";
 import { connectDB } from "./db";
+import { seedDatabase } from "./seeds";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -67,6 +68,7 @@ export class DatabaseStorage implements IStorage {
   private demoForms: Map<string, Form> = new Map();
   private demoDisciplinaryActions: Map<string, DisciplinaryAction> = new Map();
   private demoRewards: Map<string, Reward> = new Map();
+  private isMongoConnected: boolean = false;
 
   constructor() {
     // Initialize database connection and demo data
@@ -74,8 +76,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async initializeDatabase() {
-    await connectDB();
-    this.createDemoUsers();
+    try {
+      await connectDB();
+      this.isMongoConnected = true;
+      
+      // Seed database with comprehensive faculty and resident data
+      await seedDatabase();
+      
+    } catch (error) {
+      console.warn('MongoDB initialization failed, using in-memory storage:', (error as Error).message);
+      this.isMongoConnected = false;
+      this.createDemoUsers();
+    }
   }
 
   private createDemoUsers() {
@@ -106,10 +118,35 @@ export class DatabaseStorage implements IStorage {
 
   // User operations (mandatory for Replit Auth)
   async getUser(id: string): Promise<User | undefined> {
+    if (this.isMongoConnected) {
+      try {
+        const user = await UserModel.findById(id);
+        return user || undefined;
+      } catch (error) {
+        console.error('Error fetching user from MongoDB:', (error as Error).message);
+      }
+    }
     return this.demoUsers.get(id);
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
+    if (this.isMongoConnected) {
+      try {
+        const user = await UserModel.findByIdAndUpdate(
+          userData._id,
+          {
+            ...userData,
+            role: userData.role || "viewer",
+            updatedAt: new Date(),
+          },
+          { upsert: true, new: true }
+        );
+        return user!;
+      } catch (error) {
+        console.error('Error upserting user to MongoDB:', (error as Error).message);
+      }
+    }
+    
     const user: User = {
       _id: userData._id,
       email: userData.email,
@@ -126,16 +163,42 @@ export class DatabaseStorage implements IStorage {
 
   // Resident operations
   async getAllResidents(): Promise<Resident[]> {
+    if (this.isMongoConnected) {
+      try {
+        const residents = await ResidentModel.find({ status: 'active' })
+          .sort({ department: 1, fullName: 1 });
+        return residents;
+      } catch (error) {
+        console.error('Error fetching residents from MongoDB:', (error as Error).message);
+      }
+    }
     return Array.from(this.demoResidents.values()).sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
   async getResident(id: string): Promise<Resident | undefined> {
+    if (this.isMongoConnected) {
+      try {
+        const resident = await ResidentModel.findById(id);
+        return resident || undefined;
+      } catch (error) {
+        console.error('Error fetching resident from MongoDB:', (error as Error).message);
+      }
+    }
     return this.demoResidents.get(id);
   }
 
   async createResident(resident: InsertResident): Promise<Resident> {
+    if (this.isMongoConnected) {
+      try {
+        const newResident = await ResidentModel.create(resident);
+        return newResident;
+      } catch (error) {
+        console.error('Error creating resident in MongoDB:', (error as Error).message);
+      }
+    }
+    
     const id = `resident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newResident: Resident = {
       _id: id,
@@ -165,16 +228,42 @@ export class DatabaseStorage implements IStorage {
 
   // Faculty operations
   async getAllFaculty(): Promise<Faculty[]> {
+    if (this.isMongoConnected) {
+      try {
+        const faculty = await FacultyModel.find({ status: 'active' })
+          .sort({ department: 1, name: 1 });
+        return faculty;
+      } catch (error) {
+        console.error('Error fetching faculty from MongoDB:', (error as Error).message);
+      }
+    }
     return Array.from(this.demoFaculty.values()).sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
   async getFaculty(id: string): Promise<Faculty | undefined> {
+    if (this.isMongoConnected) {
+      try {
+        const faculty = await FacultyModel.findById(id);
+        return faculty || undefined;
+      } catch (error) {
+        console.error('Error fetching faculty from MongoDB:', (error as Error).message);
+      }
+    }
     return this.demoFaculty.get(id);
   }
 
   async createFaculty(facultyData: InsertFaculty): Promise<Faculty> {
+    if (this.isMongoConnected) {
+      try {
+        const faculty = await FacultyModel.create(facultyData);
+        return faculty;
+      } catch (error) {
+        console.error('Error creating faculty in MongoDB:', (error as Error).message);
+      }
+    }
+    
     const id = `faculty_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const newFaculty: Faculty = {
       _id: id,

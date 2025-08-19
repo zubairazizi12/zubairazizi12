@@ -283,6 +283,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Development seeding route
+  app.post("/api/seed", async (req: any, res) => {
+    try {
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(403).json({ message: "Seeding only allowed in development" });
+      }
+      
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { seedDatabase } = await import("./seeds");
+      await seedDatabase();
+      
+      res.json({ 
+        message: "Database seeded successfully with comprehensive faculty and resident data",
+        details: {
+          facultyMembers: "36 faculty members across 12 departments",
+          residents: "14 residents across various departments",
+          departments: ["Internal Medicine", "Surgery", "Cardiology", "Emergency Medicine", "Pediatrics", "Psychiatry", "Radiology", "Anesthesiology", "Obstetrics & Gynecology", "Orthopedic Surgery", "Neurology", "Dermatology"]
+        }
+      });
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      res.status(500).json({ message: "Failed to seed database", error: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

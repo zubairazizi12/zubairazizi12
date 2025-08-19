@@ -28,20 +28,23 @@ Preferred communication style: Simple, everyday language.
 - **Middleware pattern** for request logging and error handling
 
 ### Data Layer
-- **MongoDB** database for flexible document-based storage
+- **MongoDB** database for flexible document-based storage with fallback to in-memory storage
 - **Mongoose ODM** for schema modeling and database operations
 - **Database collections** include users, residents, faculty, forms, disciplinary actions, rewards, and sessions
 - **Schema validation** using Zod for runtime type checking
 - **Document-based data modeling** with embedded and referenced relationships
+- **Comprehensive seeding system** with 36 faculty members across 12 departments and 14 residents
+- **Department-based organization** for Internal Medicine, Surgery, Cardiology, Emergency Medicine, Pediatrics, Psychiatry, Radiology, Anesthesiology, OB/GYN, Orthopedic Surgery, Neurology, and Dermatology
 
 ### Key Features
 - **Resident Management**: Complete CRUD operations for resident profiles with department assignment and status tracking
 - **Training Forms System**: Nine mandatory forms (J, F, D, I, G, E, C, H, K) with completion tracking and form data storage
-- **Faculty Management**: Comprehensive faculty profiles with supervision capabilities
+- **Faculty Management**: Comprehensive faculty profiles with supervision capabilities across 12 medical departments
 - **Disciplinary Actions & Rewards**: Tracking system for resident performance incidents and achievements
 - **Reports Module**: Detailed reporting capabilities for residents, forms, disciplinary actions, rewards, and faculty
-- **Authentication**: Secure OAuth integration with Replit Auth system
+- **Authentication**: Secure OAuth integration with Replit Auth system with demo authentication fallback
 - **Authorization**: Role-based permissions for admin (full access) and viewer (read-only) users
+- **Database Seeding**: Development API endpoint for populating comprehensive faculty and resident data
 
 ### Design Patterns
 - **Repository Pattern**: Storage interface abstraction for data access operations
