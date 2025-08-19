@@ -1,0 +1,862 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Resident Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32',
+                        secondary: '#4CAF50',
+                        accent: '#81C784',
+                        surface: '#FFFFFF',
+                        background: '#FAFAFA',
+                        muted: '#9E9E9E'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .slide-down { animation: slideDown 0.3s ease-in-out; }
+        .scale-in { animation: scaleIn 0.2s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .hover-lift {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .resident-row:hover {
+            background-color: #F1F8E9;
+            cursor: pointer;
+        }
+        
+        .form-card {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .form-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(46, 125, 50, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-background font-sans">
+    <!-- Login Screen (Initially Hidden) -->
+    <div id="loginScreen" class="hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-secondary">
+        <!-- @COMPONENT: LoginForm [username, password, role selection] -->
+        <div class="bg-surface p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 scale-in">
+            <div class="text-center mb-8">
+                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-md text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Hospital Resident Management</h1>
+                <p class="text-muted">Sign in to continue</p>
+            </div>
+            
+            <form class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Enter username" data-bind="auth.username">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Enter password" data-bind="auth.password">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all" data-bind="auth.role">
+                        <option value="admin">Administrator</option>
+                        <option value="viewer">Viewer</option>
+                    </select>
+                </div>
+                
+                <button type="button" onclick="showDashboard()" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium" data-event="click:handleLogin">
+                    Sign In
+                </button>
+            </form>
+        </div>
+        <!-- @END_COMPONENT: LoginForm -->
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="min-h-screen bg-background">
+        <!-- Header -->
+        <!-- @COMPONENT: Header [user info, logout, notifications] -->
+        <header class="bg-surface shadow-sm border-b border-gray-200">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-primary text-white w-10 h-10 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-hospital-alt"></i>
+                    </div>
+                    <h1 class="text-xl font-bold text-gray-800">Resident Management System</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-muted" data-bind="currentUser.role">Administrator</span>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                            <span data-bind="currentUser.initials">AD</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700" data-bind="currentUser.name">Dr. Admin</span>
+                    </div>
+                    <button class="text-muted hover:text-gray-700 transition-colors" data-event="click:handleLogout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: Header -->
+
+        <div class="flex h-[calc(100vh-80px)]">
+            <!-- Sidebar Navigation -->
+            <!-- @COMPONENT: Sidebar [navigation menu, role-based visibility] -->
+            <aside class="w-64 bg-surface shadow-sm border-r border-gray-200">
+                <nav class="p-4 space-y-2">
+                    <button class="w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg bg-primary text-white font-medium" data-event="click:showResidents">
+                        <i class="fas fa-users"></i>
+                        <span>Residents</span>
+                    </button>
+                    
+                    <button class="w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg text-gray-700 hover:bg-gray-100 transition-colors" data-event="click:showFaculty">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Faculty</span>
+                    </button>
+                    
+                    <button class="w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg text-gray-700 hover:bg-gray-100 transition-colors" data-event="click:showReports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </button>
+                    
+                    <button class="w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg text-gray-700 hover:bg-gray-100 transition-colors" data-event="click:showSettings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </button>
+                </nav>
+            </aside>
+            <!-- @END_COMPONENT: Sidebar -->
+
+            <!-- Main Content Area -->
+            <main class="flex-1 flex flex-col overflow-hidden">
+                <!-- Residents View (Default) -->
+                <!-- @COMPONENT: ResidentsView [resident list, forms management] -->
+                <div id="residentsView" class="flex-1 flex flex-col">
+                    <!-- Content Header -->
+                    <div class="bg-surface px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">Residents Management</h2>
+                                <p class="text-muted mt-1">Manage resident profiles and training forms</p>
+                            </div>
+                            
+                            <div class="flex space-x-3">
+                                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium" data-event="click:addResident">
+                                    <i class="fas fa-plus mr-2"></i>Add Resident
+                                </button>
+                                
+                                <button class="bg-secondary text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium" data-event="click:exportData">
+                                    <i class="fas fa-download mr-2"></i>Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Residents Table -->
+                    <div class="flex-1 overflow-auto p-6">
+                        <div class="bg-surface rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Resident</th>
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Department</th>
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Start Date</th>
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Forms Progress</th>
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <!-- @MAP: residents.map(resident => ( -->
+                                        <tr class="resident-row transition-all duration-200" onclick="selectResident(this)" data-resident-id="1">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-medium">
+                                                        <span data-bind="resident.initials">JS</span>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="font-medium text-gray-900" data-bind="resident.name">Dr. John Smith</div>
+                                                        <div class="text-sm text-muted" data-bind="resident.id">ID: RES001</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-gray-900" data-bind="resident.department">Cardiology</td>
+                                            <td class="px-6 py-4 text-gray-900" data-bind="resident.startDate">Jan 15, 2024</td>
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                                                        <div class="bg-secondary h-2 rounded-full" style="width: 67%" data-bind="resident.formsProgress"></div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-700" data-bind="resident.formsCount">6/9</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-secondary text-white" data-bind="resident.status">Active</span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <button class="text-primary hover:text-green-700 mr-3" data-event="click:editResident">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="text-red-500 hover:text-red-700" data-event="click:deleteResident">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="resident-row transition-all duration-200" onclick="selectResident(this)" data-resident-id="2">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-medium">
+                                                        EJ
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="font-medium text-gray-900">Dr. Emily Johnson</div>
+                                                        <div class="text-sm text-muted">ID: RES002</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-gray-900">Neurology</td>
+                                            <td class="px-6 py-4 text-gray-900">Feb 1, 2024</td>
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                                                        <div class="bg-secondary h-2 rounded-full" style="width: 44%"></div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-700">4/9</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-secondary text-white">Active</span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <button class="text-primary hover:text-green-700 mr-3">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="text-red-500 hover:text-red-700">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr class="resident-row transition-all duration-200" onclick="selectResident(this)" data-resident-id="3">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-medium">
+                                                        MB
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="font-medium text-gray-900">Dr. Michael Brown</div>
+                                                        <div class="text-sm text-muted">ID: RES003</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-gray-900">Orthopedics</td>
+                                            <td class="px-6 py-4 text-gray-900">Mar 10, 2024</td>
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center">
+                                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-3">
+                                                        <div class="bg-secondary h-2 rounded-full" style="width: 89%"></div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-gray-700">8/9</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-3 py-1 rounded-full text-sm font-medium bg-secondary text-white">Active</span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <button class="text-primary hover:text-green-700 mr-3">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="text-red-500 hover:text-red-700">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <!-- @END_MAP )) -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ResidentsView -->
+
+                <!-- Faculty View (Hidden) -->
+                <!-- @COMPONENT: FacultyView [faculty list, management] -->
+                <div id="facultyView" class="hidden flex-1 flex flex-col">
+                    <div class="bg-surface px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">Faculty Management</h2>
+                                <p class="text-muted mt-1">Manage trainers and supervisors</p>
+                            </div>
+                            
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                                <i class="fas fa-plus mr-2"></i>Add Faculty
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-auto p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- @MAP: faculty.map(member => ( -->
+                            <div class="bg-surface rounded-xl shadow-sm border border-gray-200 p-6 hover-lift">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-medium text-lg">
+                                        <span data-bind="faculty.initials">DS</span>
+                                    </div>
+                                    <button class="text-muted hover:text-gray-700">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                                
+                                <h3 class="font-semibold text-gray-900 mb-2" data-bind="faculty.name">Dr. Sarah Wilson</h3>
+                                <p class="text-sm text-muted mb-1" data-bind="faculty.department">Cardiology Department</p>
+                                <p class="text-sm text-muted mb-4" data-bind="faculty.role">Senior Consultant</p>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-envelope w-4 mr-2"></i>
+                                        <span data-bind="faculty.email">sarah.wilson@hospital.com</span>
+                                    </div>
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-phone w-4 mr-2"></i>
+                                        <span data-bind="faculty.phone">+1 234 567 8900</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-surface rounded-xl shadow-sm border border-gray-200 p-6 hover-lift">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-medium text-lg">
+                                        RJ
+                                    </div>
+                                    <button class="text-muted hover:text-gray-700">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                                
+                                <h3 class="font-semibold text-gray-900 mb-2">Dr. Robert Jones</h3>
+                                <p class="text-sm text-muted mb-1">Neurology Department</p>
+                                <p class="text-sm text-muted mb-4">Department Head</p>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-envelope w-4 mr-2"></i>
+                                        <span>robert.jones@hospital.com</span>
+                                    </div>
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-phone w-4 mr-2"></i>
+                                        <span>+1 234 567 8901</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-surface rounded-xl shadow-sm border border-gray-200 p-6 hover-lift">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-medium text-lg">
+                                        AM
+                                    </div>
+                                    <button class="text-muted hover:text-gray-700">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                </div>
+                                
+                                <h3 class="font-semibold text-gray-900 mb-2">Dr. Anna Martinez</h3>
+                                <p class="text-sm text-muted mb-1">Orthopedics Department</p>
+                                <p class="text-sm text-muted mb-4">Senior Resident Supervisor</p>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-envelope w-4 mr-2"></i>
+                                        <span>anna.martinez@hospital.com</span>
+                                    </div>
+                                    <div class="flex items-center text-muted">
+                                        <i class="fas fa-phone w-4 mr-2"></i>
+                                        <span>+1 234 567 8902</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: FacultyView -->
+            </main>
+        </div>
+
+        <!-- Forms Section (Appears when resident is selected) -->
+        <!-- @COMPONENT: FormsSection [9 mandatory forms, expandable] -->
+        <div id="formsSection" class="hidden bg-surface border-t border-gray-200 slide-down">
+            <!-- @STATE: selectedResident:object = null, showForms:boolean = false -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Training Forms</h3>
+                        <p class="text-sm text-muted" id="selectedResidentName">Dr. John Smith - Cardiology</p>
+                    </div>
+                    
+                    <button onclick="closeForms()" class="text-muted hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- @MAP: forms.map(form => ( -->
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('J')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center font-bold">
+                                J
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-white">Completed</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Clinical Assessment Form</h4>
+                        <p class="text-sm text-muted mb-3">Initial clinical evaluation and competency assessment</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Mar 15, 2024</div>
+                            <div>By: Dr. Sarah Wilson</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('F')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center font-bold">
+                                F
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-white">Completed</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Fellowship Application</h4>
+                        <p class="text-sm text-muted mb-3">Fellowship program application and approval</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Feb 28, 2024</div>
+                            <div>By: Dr. Robert Jones</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('D')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center font-bold">
+                                D
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-white">Completed</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Disciplinary Record</h4>
+                        <p class="text-sm text-muted mb-3">Disciplinary actions and behavioral assessments</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Mar 1, 2024</div>
+                            <div>By: Dr. Sarah Wilson</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('I')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center font-bold">
+                                I
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-white">Completed</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Initial Orientation</h4>
+                        <p class="text-sm text-muted mb-3">Orientation completion and initial setup</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Jan 20, 2024</div>
+                            <div>By: Dr. Anna Martinez</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('G')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center font-bold">
+                                G
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-white">Completed</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Goals & Objectives</h4>
+                        <p class="text-sm text-muted mb-3">Training goals and learning objectives</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Feb 15, 2024</div>
+                            <div>By: Dr. Robert Jones</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('E')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center font-bold">
+                                E
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-secondary text-white">Completed</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Evaluation Report</h4>
+                        <p class="text-sm text-muted mb-3">Performance evaluation and feedback</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Mar 10, 2024</div>
+                            <div>By: Dr. Sarah Wilson</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('C')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold">
+                                C
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-orange-500 text-white">In Progress</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Competency Assessment</h4>
+                        <p class="text-sm text-muted mb-3">Skills and competency evaluation</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Last updated: Mar 12, 2024</div>
+                            <div>By: Dr. Anna Martinez</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('H')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-gray-400 text-white rounded-lg flex items-center justify-center font-bold">
+                                H
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-400 text-white">Pending</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Health & Safety</h4>
+                        <p class="text-sm text-muted mb-3">Health and safety compliance form</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Not started</div>
+                            <div>Assigned to: Dr. Robert Jones</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer" onclick="openFormDetail('K')">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 bg-gray-400 text-white rounded-lg flex items-center justify-center font-bold">
+                                K
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-400 text-white">Pending</span>
+                        </div>
+                        
+                        <h4 class="font-medium text-gray-900 mb-2">Knowledge Assessment</h4>
+                        <p class="text-sm text-muted mb-3">Final knowledge and skills assessment</p>
+                        
+                        <div class="text-xs text-muted">
+                            <div>Not started</div>
+                            <div>Assigned to: Dr. Sarah Wilson</div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FormsSection -->
+
+        <!-- Form Detail Modal -->
+        <!-- @COMPONENT: FormDetailModal [complete form view, editing capabilities] -->
+        <div id="formDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-surface rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden scale-in">
+                <div class="bg-primary text-white px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold" id="formModalTitle">Clinical Assessment Form (J)</h3>
+                        <p class="text-green-100 text-sm" id="formModalSubtitle">Dr. John Smith - Cardiology Department</p>
+                    </div>
+                    
+                    <button onclick="closeFormDetail()" class="text-white hover:text-green-200 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+                    <!-- @FUNCTIONALITY: Form fields should be dynamically generated based on form type -->
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Assessment Date</label>
+                                <input type="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" value="2024-03-15" data-bind="form.assessmentDate">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Evaluator</label>
+                                <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="form.evaluator">
+                                    <option>Dr. Sarah Wilson</option>
+                                    <option>Dr. Robert Jones</option>
+                                    <option>Dr. Anna Martinez</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Clinical Competency Rating</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="competency" value="excellent" class="mr-2 text-primary focus:ring-primary">
+                                    <span class="text-sm">Excellent</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="competency" value="good" class="mr-2 text-primary focus:ring-primary" checked>
+                                    <span class="text-sm">Good</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="competency" value="satisfactory" class="mr-2 text-primary focus:ring-primary">
+                                    <span class="text-sm">Satisfactory</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="competency" value="needs-improvement" class="mr-2 text-primary focus:ring-primary">
+                                    <span class="text-sm">Needs Improvement</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Assessment Comments</label>
+                            <textarea rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter detailed assessment comments..." data-bind="form.comments">Dr. Smith demonstrates excellent clinical skills and shows strong potential for specialization in cardiology. Recommended for continued training with advanced procedures.</textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Skills Assessment</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="font-medium">Patient Communication</span>
+                                    <div class="flex space-x-2">
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="font-medium">Clinical Diagnosis</span>
+                                    <div class="flex space-x-2">
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span class="font-medium">Procedure Execution</span>
+                                    <div class="flex space-x-2">
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-secondary rounded-full"></div>
+                                        <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                        <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                            <button onclick="closeFormDetail()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                Cancel
+                            </button>
+                            <button class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-green-700 transition-colors" data-event="click:saveForm">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FormDetailModal -->
+    </div>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        (function() {
+            // Initial state management
+            let currentView = 'residents';
+            let selectedResident = null;
+            let showForms = false;
+            
+            // Initialize the application
+            function init() {
+                showDashboard();
+            }
+            
+            // Navigation functions
+            window.showDashboard = function() {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                showResidents();
+            };
+            
+            window.showResidents = function() {
+                hideAllViews();
+                document.getElementById('residentsView').classList.remove('hidden');
+                currentView = 'residents';
+                updateNavigation();
+            };
+            
+            window.showFaculty = function() {
+                hideAllViews();
+                document.getElementById('facultyView').classList.remove('hidden');
+                currentView = 'faculty';
+                updateNavigation();
+                hideForms();
+            };
+            
+            function hideAllViews() {
+                document.getElementById('residentsView').classList.add('hidden');
+                document.getElementById('facultyView').classList.add('hidden');
+            }
+            
+            function updateNavigation() {
+                // Update active navigation state
+                const navButtons = document.querySelectorAll('nav button');
+                navButtons.forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+                });
+                
+                // Set active button based on current view
+                const activeIndex = currentView === 'residents' ? 0 : currentView === 'faculty' ? 1 : 2;
+                if (navButtons[activeIndex]) {
+                    navButtons[activeIndex].classList.add('bg-primary', 'text-white');
+                    navButtons[activeIndex].classList.remove('text-gray-700', 'hover:bg-gray-100');
+                }
+            }
+            
+            // Resident selection and forms management
+            window.selectResident = function(row) {
+                // Remove previous selection
+                document.querySelectorAll('.resident-row').forEach(r => {
+                    r.classList.remove('bg-green-50', 'border-l-4', 'border-l-primary');
+                });
+                
+                // Add selection styling
+                row.classList.add('bg-green-50', 'border-l-4', 'border-l-primary');
+                
+                // Get resident data (in real app, this would come from data binding)
+                const residentName = row.querySelector('[data-bind="resident.name"]').textContent;
+                const department = row.querySelector('[data-bind="resident.department"]').textContent;
+                
+                // Update selected resident info
+                document.getElementById('selectedResidentName').textContent = `${residentName} - ${department}`;
+                
+                // Show forms section with animation
+                showForms();
+                
+                selectedResident = row.dataset.residentId;
+            };
+            
+            function showForms() {
+                const formsSection = document.getElementById('formsSection');
+                formsSection.classList.remove('hidden');
+                formsSection.classList.add('slide-down');
+                showForms = true;
+            }
+            
+            window.closeForms = function() {
+                hideForms();
+                // Remove selection styling
+                document.querySelectorAll('.resident-row').forEach(r => {
+                    r.classList.remove('bg-green-50', 'border-l-4', 'border-l-primary');
+                });
+                selectedResident = null;
+            };
+            
+            function hideForms() {
+                document.getElementById('formsSection').classList.add('hidden');
+                showForms = false;
+            }
+            
+            // Form detail management
+            window.openFormDetail = function(formType) {
+                const modal = document.getElementById('formDetailModal');
+                const title = document.getElementById('formModalTitle');
+                
+                // Map form types to titles (in real app, this would come from configuration)
+                const formTitles = {
+                    'J': 'Clinical Assessment Form (J)',
+                    'F': 'Fellowship Application (F)',
+                    'D': 'Disciplinary Record (D)',
+                    'I': 'Initial Orientation (I)',
+                    'G': 'Goals & Objectives (G)',
+                    'E': 'Evaluation Report (E)',
+                    'C': 'Competency Assessment (C)',
+                    'H': 'Health & Safety (H)',
+                    'K': 'Knowledge Assessment (K)'
+                };
+                
+                title.textContent = formTitles[formType] || `Form ${formType}`;
+                modal.classList.remove('hidden');
+                
+                // In real app: Load form data based on formType and selectedResident
+                // loadFormData(formType, selectedResident);
+            };
+            
+            window.closeFormDetail = function() {
+                document.getElementById('formDetailModal').classList.add('hidden');
+            };
+            
+            // Close modal when clicking outside
+            document.getElementById('formDetailModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeFormDetail();
+                }
+            });
+            
+            // Initialize application
+            init();
+        })();
+    </script>
+</body>
+</html>

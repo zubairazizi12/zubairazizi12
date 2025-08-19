@@ -1,0 +1,620 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Resident Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: {
+                        50: '#f0fdf4',
+                        100: '#dcfce7',
+                        200: '#bbf7d0',
+                        300: '#86efac',
+                        400: '#4ade80',
+                        500: '#22c55e',
+                        600: '#16a34a',
+                        700: '#15803d',
+                        800: '#166534',
+                        900: '#14532d'
+                    },
+                    gray: {
+                        50: '#f9fafb',
+                        100: '#f3f4f6',
+                        200: '#e5e7eb',
+                        300: '#d1d5db',
+                        400: '#9ca3af',
+                        500: '#6b7280',
+                        600: '#4b5563',
+                        700: '#374151',
+                        800: '#1f2937',
+                        900: '#111827'
+                    }
+                }
+            }
+        }
+    };
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- @COMPONENT: AppHeader [userRole, currentUser] -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-hospital text-primary-600 text-2xl mr-3"></i>
+                    <h1 class="text-xl font-semibold text-gray-900">Hospital Resident Management</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800" data-bind="userRole">
+                        Admin User
+                    </span>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-user-circle text-gray-400 text-lg"></i>
+                        <span class="text-sm text-gray-700" data-bind="currentUser.name">Dr. Sarah Johnson</span>
+                    </div>
+                    <button class="text-gray-500 hover:text-gray-700 transition-colors" data-event="click:handleLogout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: AppHeader -->
+
+    <div class="flex min-h-screen">
+        <!-- @COMPONENT: Sidebar [userRole] -->
+        <aside class="w-64 bg-white shadow-sm border-r border-gray-200">
+            <nav class="mt-8 px-4">
+                <div class="space-y-2">
+                    <a href="#dashboard" class="bg-primary-50 text-primary-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                        <i class="fas fa-chart-line mr-3 text-primary-500"></i>
+                        Dashboard
+                    </a>
+                    <a href="#residents" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors">
+                        <i class="fas fa-user-graduate mr-3 text-gray-400"></i>
+                        Residents
+                    </a>
+                    <a href="#faculty" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors">
+                        <i class="fas fa-user-md mr-3 text-gray-400"></i>
+                        Faculty Directory
+                    </a>
+                    <a href="#forms" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors">
+                        <i class="fas fa-file-medical mr-3 text-gray-400"></i>
+                        Training Forms
+                    </a>
+                    <a href="#discipline" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors">
+                        <i class="fas fa-exclamation-triangle mr-3 text-gray-400"></i>
+                        Disciplinary Actions
+                    </a>
+                    <a href="#rewards" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors">
+                        <i class="fas fa-award mr-3 text-gray-400"></i>
+                        Rewards & Achievements
+                    </a>
+                    <a href="#reports" class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors">
+                        <i class="fas fa-chart-bar mr-3 text-gray-400"></i>
+                        Reports
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <!-- @COMPONENT: Dashboard [statistics, recentActivity] -->
+            <div class="p-8">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
+                    <p class="mt-1 text-sm text-gray-600">Welcome back, monitor your hospital resident training program</p>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-user-graduate text-primary-600 text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Active Residents</p>
+                                <p class="text-2xl font-semibold text-gray-900" data-bind="stats.activeResidents">24</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-user-md text-primary-600 text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Faculty Members</p>
+                                <p class="text-2xl font-semibold text-gray-900" data-bind="stats.facultyMembers">12</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-file-medical text-primary-600 text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Pending Forms</p>
+                                <p class="text-2xl font-semibold text-gray-900" data-bind="stats.pendingForms">8</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-award text-primary-600 text-2xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-600">Awards This Month</p>
+                                <p class="text-2xl font-semibold text-gray-900" data-bind="stats.monthlyAwards">3</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Faculty Directory Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Faculty Directory</h3>
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors" data-event="click:handleAddFaculty" data-implementation="Show modal for adding new faculty member">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Faculty
+                        </button>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <label for="search-faculty" class="sr-only">Search faculty</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="search-faculty" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500" placeholder="Search by name, department, or specialization..." data-bind="searchQuery">
+                                </div>
+                            </div>
+                            <select class="block w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500" data-bind="departmentFilter">
+                                <option value="">All Departments</option>
+                                <option value="cardiology">Cardiology</option>
+                                <option value="neurology">Neurology</option>
+                                <option value="surgery">Surgery</option>
+                                <option value="pediatrics">Pediatrics</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Faculty Cards Grid -->
+                    <!-- @MAP: filteredFaculty.map(faculty => ( -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <!-- Professional headshot of a male doctor in white coat -->
+                                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200" alt="Dr. Michael Chen" class="h-12 w-12 rounded-full object-cover">
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-lg font-medium text-gray-900" data-bind="faculty.name">Dr. Michael Chen</h4>
+                                        <p class="text-sm text-gray-500" data-bind="faculty.title">Senior Attending Physician</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600" data-event="click:handleEditFaculty" data-implementation="Open edit modal for faculty">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-stethoscope mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.department">Cardiology</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-envelope mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.email">m.chen@hospital.com</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-phone mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.phone">+1 (555) 123-4567</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800" data-bind="faculty.status">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <!-- Professional headshot of a female doctor in scrubs -->
+                                        <img src="https://pixabay.com/get/g364e8c98aaa8487ef2cb287d8f36478c79284340ce67417c44ed25b2cea645978fbfa3ce2a8b8a995c2ec6699efa648465921a97af4597efd95b93b69e21bbae_1280.jpg" alt="Dr. Sarah Rodriguez" class="h-12 w-12 rounded-full object-cover">
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-lg font-medium text-gray-900" data-bind="faculty.name">Dr. Sarah Rodriguez</h4>
+                                        <p class="text-sm text-gray-500" data-bind="faculty.title">Chief of Neurology</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600" data-event="click:handleEditFaculty">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-stethoscope mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.department">Neurology</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-envelope mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.email">s.rodriguez@hospital.com</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-phone mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.phone">+1 (555) 234-5678</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800" data-bind="faculty.status">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow" data-mock="true">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        <!-- Professional headshot of a male surgeon -->
+                                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200" alt="Dr. James Wilson" class="h-12 w-12 rounded-full object-cover">
+                                    </div>
+                                    <div class="ml-4">
+                                        <h4 class="text-lg font-medium text-gray-900" data-bind="faculty.name">Dr. James Wilson</h4>
+                                        <p class="text-sm text-gray-500" data-bind="faculty.title">Surgical Resident Supervisor</p>
+                                    </div>
+                                </div>
+                                <button class="text-gray-400 hover:text-gray-600" data-event="click:handleEditFaculty">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-stethoscope mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.department">General Surgery</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600 mb-2">
+                                    <i class="fas fa-envelope mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.email">j.wilson@hospital.com</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-phone mr-2 text-primary-500"></i>
+                                    <span data-bind="faculty.phone">+1 (555) 345-6789</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800" data-bind="faculty.status">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+
+                <!-- Resident Management Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Residents</h3>
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors" data-event="click:handleAddResident">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Resident
+                        </button>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resident</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Forms Progress</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- @MAP: recentResidents.map(resident => ( -->
+                                <tr class="hover:bg-gray-50" data-mock="true">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <!-- Professional headshot of a young resident doctor -->
+                                                <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200" alt="Emily Carter" class="h-10 w-10 rounded-full object-cover">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900" data-bind="resident.name">Dr. Emily Carter</div>
+                                                <div class="text-sm text-gray-500" data-bind="resident.id">RES-2024-001</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-bind="resident.department">Internal Medicine</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-bind="resident.startDate">Jan 15, 2024</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-primary-600 h-2 rounded-full" style="width: 66%"></div>
+                                            </div>
+                                            <span class="ml-2 text-sm text-gray-500" data-bind="resident.formsProgress">6/9</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800" data-bind="resident.status">
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="text-primary-600 hover:text-primary-900 mr-4" data-event="click:handleViewResident">View</button>
+                                        <button class="text-gray-600 hover:text-gray-900" data-event="click:handleEditResident">Edit</button>
+                                    </td>
+                                </tr>
+                                <!-- @END_MAP )) -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Training Forms Section -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Training Forms Overview</h3>
+                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors" data-event="click:handleManageForms">
+                            <i class="fas fa-file-medical mr-2"></i>
+                            Manage Forms
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- @MAP: formTypes.map(formType => ( -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" data-mock="true">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-medium text-gray-900" data-bind="formType.name">Form J - Initial Assessment</h4>
+                                <i class="fas fa-file-alt text-primary-500 text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4" data-bind="formType.description">Initial resident evaluation and baseline assessment form.</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-900" data-bind="formType.completed">18 Completed</span>
+                                <button class="text-primary-600 hover:text-primary-700 text-sm font-medium" data-event="click:handleViewForm">
+                                    View Details →
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" data-mock="true">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-medium text-gray-900" data-bind="formType.name">Form F - Clinical Skills</h4>
+                                <i class="fas fa-user-check text-primary-500 text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4" data-bind="formType.description">Clinical skills evaluation and competency assessment.</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-900" data-bind="formType.completed">15 Completed</span>
+                                <button class="text-primary-600 hover:text-primary-700 text-sm font-medium" data-event="click:handleViewForm">
+                                    View Details →
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" data-mock="true">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-medium text-gray-900" data-bind="formType.name">Form D - Professional Development</h4>
+                                <i class="fas fa-graduation-cap text-primary-500 text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4" data-bind="formType.description">Professional development and learning objectives tracking.</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-900" data-bind="formType.completed">12 Completed</span>
+                                <button class="text-primary-600 hover:text-primary-700 text-sm font-medium" data-event="click:handleViewForm">
+                                    View Details →
+                                </button>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: Dashboard -->
+
+            <!-- @COMPONENT: FormEditModal [formType, residentId, userRole] -->
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden" id="form-modal" data-mock="true">
+                <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+                    <div class="mt-3">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-medium text-gray-900">Edit Training Form J - Initial Assessment</h3>
+                            <button class="text-gray-400 hover:text-gray-600" data-event="click:handleCloseModal">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <form class="space-y-6" data-implementation="Form validation and submission logic">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="resident-name" class="block text-sm font-medium text-gray-700">Resident Name</label>
+                                    <input type="text" id="resident-name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" value="Dr. Emily Carter" readonly>
+                                </div>
+                                <div>
+                                    <label for="evaluation-date" class="block text-sm font-medium text-gray-700">Evaluation Date</label>
+                                    <input type="date" id="evaluation-date" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" data-bind="form.evaluationDate">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="clinical-performance" class="block text-sm font-medium text-gray-700">Clinical Performance Rating</label>
+                                <select id="clinical-performance" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" data-bind="form.clinicalPerformance">
+                                    <option value="">Select Rating</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="satisfactory">Satisfactory</option>
+                                    <option value="needs-improvement">Needs Improvement</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="strengths" class="block text-sm font-medium text-gray-700">Strengths & Achievements</label>
+                                <textarea id="strengths" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" placeholder="Describe the resident's strengths and notable achievements..." data-bind="form.strengths"></textarea>
+                            </div>
+
+                            <div>
+                                <label for="improvement-areas" class="block text-sm font-medium text-gray-700">Areas for Improvement</label>
+                                <textarea id="improvement-areas" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" placeholder="Identify areas where the resident can improve..." data-bind="form.improvementAreas"></textarea>
+                            </div>
+
+                            <div>
+                                <label for="supervisor-comments" class="block text-sm font-medium text-gray-700">Supervisor Comments</label>
+                                <textarea id="supervisor-comments" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500" placeholder="Additional comments and feedback..." data-bind="form.supervisorComments"></textarea>
+                            </div>
+
+                            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" data-event="click:handleCancel">
+                                    Cancel
+                                </button>
+                                <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" data-event="click:handleSaveDraft" data-implementation="Save form as draft">
+                                    Save as Draft
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors" data-event="click:handleSubmitForm" data-implementation="Validate and submit form">
+                                    Submit Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: FormEditModal -->
+
+            <!-- @COMPONENT: ReportsSection [userRole, reportTypes] -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 m-8 p-6" data-mock="true">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Reports & Analytics</h3>
+                    <div class="flex space-x-2">
+                        <button class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" data-event="click:handleExportPDF">
+                            <i class="fas fa-file-pdf mr-2 text-red-500"></i>
+                            Export PDF
+                        </button>
+                        <button class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors" data-event="click:handlePrint">
+                            <i class="fas fa-print mr-2"></i>
+                            Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-left" data-event="click:handleGenerateReport" data-report-type="residents">
+                        <i class="fas fa-user-graduate text-primary-500 text-2xl mb-2"></i>
+                        <h4 class="font-medium text-gray-900">Resident Reports</h4>
+                        <p class="text-sm text-gray-600">Comprehensive resident profiles and progress</p>
+                    </button>
+
+                    <button class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-left" data-event="click:handleGenerateReport" data-report-type="faculty">
+                        <i class="fas fa-user-md text-primary-500 text-2xl mb-2"></i>
+                        <h4 class="font-medium text-gray-900">Faculty Directory</h4>
+                        <p class="text-sm text-gray-600">Complete faculty member listings</p>
+                    </button>
+
+                    <button class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-left" data-event="click:handleGenerateReport" data-report-type="forms">
+                        <i class="fas fa-file-medical text-primary-500 text-2xl mb-2"></i>
+                        <h4 class="font-medium text-gray-900">Training Forms</h4>
+                        <p class="text-sm text-gray-600">Form completion and evaluation status</p>
+                    </button>
+
+                    <button class="p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-left" data-event="click:handleGenerateReport" data-report-type="performance">
+                        <i class="fas fa-chart-line text-primary-500 text-2xl mb-2"></i>
+                        <h4 class="font-medium text-gray-900">Performance Analytics</h4>
+                        <p class="text-sm text-gray-600">Training program effectiveness metrics</p>
+                    </button>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: ReportsSection -->
+        </main>
+    </div>
+
+    <script>
+    (function() {
+        // TODO: Implement authentication state management
+        // TODO: Implement role-based UI rendering
+        // TODO: Implement form validation and submission logic
+        // TODO: Implement search and filter functionality for faculty directory
+        // TODO: Implement modal management for forms and faculty editing
+        // TODO: Implement report generation and export functionality
+        // TODO: Implement real-time data binding and updates
+        
+        // Basic interaction handlers for demonstration
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('[data-event*="click:"]')) {
+                const action = e.target.getAttribute('data-event').split(':')[1];
+                console.log(`Action triggered: ${action}`);
+                
+                // Handle modal display for demonstration
+                if (action === 'handleAddFaculty' || action === 'handleEditFaculty') {
+                    // Show faculty form modal (implementation needed)
+                    console.log('Show faculty form modal');
+                }
+                
+                if (action === 'handleAddResident' || action === 'handleEditResident') {
+                    // Show resident form modal (implementation needed)
+                    console.log('Show resident form modal');
+                }
+                
+                if (action === 'handleManageForms' || action === 'handleViewForm') {
+                    // Show training form modal
+                    const modal = document.getElementById('form-modal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                    }
+                }
+                
+                if (action === 'handleCloseModal' || action === 'handleCancel') {
+                    // Hide modal
+                    const modal = document.getElementById('form-modal');
+                    if (modal) {
+                        modal.classList.add('hidden');
+                    }
+                }
+            }
+        });
+
+        // Handle form submissions
+        document.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submitted - validation and processing needed');
+        });
+
+        // Initialize responsive behavior
+        function handleResize() {
+            // Responsive layout adjustments
+            const sidebar = document.querySelector('aside');
+            const main = document.querySelector('main');
+            
+            if (window.innerWidth < 768) {
+                // Mobile responsive behavior
+                if (sidebar) sidebar.style.transform = 'translateX(-100%)';
+            } else {
+                if (sidebar) sidebar.style.transform = 'translateX(0)';
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial call
+    })();
+    </script>
+</body>
+</html>

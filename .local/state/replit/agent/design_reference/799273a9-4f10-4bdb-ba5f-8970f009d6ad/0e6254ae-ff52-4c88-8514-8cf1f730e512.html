@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Resident Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#059669',
+                        accent: '#dc2626',
+                        muted: '#9ca3af'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- @COMPONENT: AppContainer [Main application wrapper] -->
+    <div id="app-container" class="min-h-screen">
+        
+        <!-- LOGIN PAGE -->
+        <!-- @COMPONENT: LoginPage [Authentication interface] -->
+        <div id="login-page" class="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4">
+            <div class="max-w-md w-full space-y-8">
+                <div class="text-center">
+                    <div class="mx-auto h-16 w-16 bg-primary rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-hospital text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-900">Hospital Resident Management</h2>
+                    <p class="mt-2 text-gray-600">Sign in to access the system</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <form class="space-y-6" data-event="submit:handleLogin">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                data-bind="credentials.username"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Enter your username"
+                                data-mock="true"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                data-bind="credentials.password"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Enter your password"
+                                data-mock="true"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                            <select 
+                                id="role" 
+                                name="role" 
+                                data-bind="credentials.role"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                data-mock="true"
+                            >
+                                <option value="">Select your role</option>
+                                <option value="admin">Administrator</option>
+                                <option value="viewer">Viewer</option>
+                            </select>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+                            data-implementation="Should validate credentials and redirect to dashboard"
+                        >
+                            Sign In
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: LoginPage -->
+
+        <!-- MAIN DASHBOARD -->
+        <!-- @COMPONENT: Dashboard [Main application interface] -->
+        <div id="dashboard" class="min-h-screen bg-gray-50" style="display: none;">
+            
+            <!-- Navigation Header -->
+            <!-- @COMPONENT: Header [Top navigation bar] -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center h-16">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 bg-primary rounded flex items-center justify-center mr-3">
+                                <i class="fas fa-hospital text-white text-sm"></i>
+                            </div>
+                            <h1 class="text-xl font-bold text-gray-900">Hospital Resident Management</h1>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-600" data-bind="user.username" data-mock="true">Dr. Admin</span>
+                            <span class="px-2 py-1 bg-primary text-white text-xs rounded-full" data-bind="user.role" data-mock="true">Administrator</span>
+                            <button class="text-gray-500 hover:text-gray-700" data-event="click:handleLogout">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- @END_COMPONENT: Header -->
+
+            <div class="flex">
+                <!-- Sidebar Navigation -->
+                <!-- @COMPONENT: Sidebar [Main navigation menu] -->
+                <nav class="w-64 bg-white shadow-sm min-h-screen border-r border-gray-200">
+                    <div class="p-4">
+                        <ul class="space-y-2">
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-primary bg-blue-50 rounded-lg" data-nav="dashboard">
+                                    <i class="fas fa-tachometer-alt mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-nav="residents">
+                                    <i class="fas fa-user-md mr-3"></i>
+                                    Residents
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-nav="faculty">
+                                    <i class="fas fa-chalkboard-teacher mr-3"></i>
+                                    Faculty
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-nav="forms">
+                                    <i class="fas fa-clipboard-list mr-3"></i>
+                                    Training Forms
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-nav="discipline">
+                                    <i class="fas fa-exclamation-triangle mr-3"></i>
+                                    Disciplinary Actions
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-nav="rewards">
+                                    <i class="fas fa-award mr-3"></i>
+                                    Rewards
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg" data-nav="reports">
+                                    <i class="fas fa-chart-bar mr-3"></i>
+                                    Reports
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <!-- @END_COMPONENT: Sidebar -->
+
+                <!-- Main Content Area -->
+                <!-- @COMPONENT: MainContent [Dynamic content area] -->
+                <main class="flex-1 p-6">
+                    
+                    <!-- Dashboard View -->
+                    <!-- @COMPONENT: DashboardView [Overview dashboard] -->
+                    <div id="dashboard-view" class="space-y-6">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+                            <div class="text-sm text-gray-600">
+                                Last updated: <span data-bind="lastUpdated" data-mock="true">Dec 20, 2024 10:30 AM</span>
+                            </div>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-user-md text-primary text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Total Residents</p>
+                                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.totalResidents" data-mock="true">156</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-chalkboard-teacher text-secondary text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Faculty Members</p>
+                                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.totalFaculty" data-mock="true">42</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-yellow-100 rounded-lg">
+                                        <i class="fas fa-clipboard-list text-yellow-600 text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Pending Forms</p>
+                                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.pendingForms" data-mock="true">23</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <div class="flex items-center">
+                                    <div class="p-2 bg-red-100 rounded-lg">
+                                        <i class="fas fa-exclamation-triangle text-accent text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-600">Active Issues</p>
+                                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.activeIssues" data-mock="true">5</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white rounded-lg shadow">
+                                <div class="p-6 border-b border-gray-200">
+                                    <h3 class="text-lg font-semibold text-gray-900">Recent Residents</h3>
+                                </div>
+                                <div class="p-6">
+                                    <!-- @MAP: recentResidents.map(resident => ( -->
+                                    <div class="flex items-center py-3 border-b border-gray-100 last:border-b-0" data-mock="true">
+                                        <div class="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-600"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="resident.name">Dr. Sarah Johnson</p>
+                                            <p class="text-xs text-gray-600" data-bind="resident.department">Cardiology</p>
+                                        </div>
+                                        <div class="text-xs text-gray-500" data-bind="resident.joinDate">Dec 15</div>
+                                    </div>
+                                    <div class="flex items-center py-3 border-b border-gray-100 last:border-b-0" data-mock="true">
+                                        <div class="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-600"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="resident.name">Dr. Michael Chen</p>
+                                            <p class="text-xs text-gray-600" data-bind="resident.department">Neurology</p>
+                                        </div>
+                                        <div class="text-xs text-gray-500" data-bind="resident.joinDate">Dec 12</div>
+                                    </div>
+                                    <div class="flex items-center py-3 border-b border-gray-100 last:border-b-0" data-mock="true">
+                                        <div class="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user text-gray-600"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="resident.name">Dr. Lisa Rodriguez</p>
+                                            <p class="text-xs text-gray-600" data-bind="resident.department">Emergency Medicine</p>
+                                        </div>
+                                        <div class="text-xs text-gray-500" data-bind="resident.joinDate">Dec 10</div>
+                                    </div>
+                                    <!-- @END_MAP )) -->
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow">
+                                <div class="p-6 border-b border-gray-200">
+                                    <h3 class="text-lg font-semibold text-gray-900">Pending Actions</h3>
+                                </div>
+                                <div class="p-6">
+                                    <!-- @MAP: pendingActions.map(action => ( -->
+                                    <div class="flex items-center py-3 border-b border-gray-100 last:border-b-0" data-mock="true">
+                                        <div class="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-clock text-yellow-600 text-xs"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="action.title">Form J Review Required</p>
+                                            <p class="text-xs text-gray-600" data-bind="action.resident">Dr. Sarah Johnson</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center py-3 border-b border-gray-100 last:border-b-0" data-mock="true">
+                                        <div class="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-exclamation text-red-600 text-xs"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="action.title">Disciplinary Review</p>
+                                            <p class="text-xs text-gray-600" data-bind="action.resident">Dr. Mark Thompson</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center py-3 border-b border-gray-100 last:border-b-0" data-mock="true">
+                                        <div class="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-award text-green-600 text-xs"></i>
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900" data-bind="action.title">Excellence Award Approval</p>
+                                            <p class="text-xs text-gray-600" data-bind="action.resident">Dr. Emily Davis</p>
+                                        </div>
+                                    </div>
+                                    <!-- @END_MAP )) -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: DashboardView -->
+
+                    <!-- Resident Registration Form -->
+                    <!-- @COMPONENT: ResidentRegistrationForm [New resident registration] -->
+                    <div id="resident-form" class="space-y-6" style="display: none;">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Resident Registration</h2>
+                            <button class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600" data-event="click:goBack">
+                                <i class="fas fa-arrow-left mr-2"></i>Back
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="p-6">
+                                <form class="space-y-6" data-event="submit:handleResidentRegistration">
+                                    
+                                    <!-- Personal Information Section -->
+                                    <div class="border-b border-gray-200 pb-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.fullName"
+                                                    data-mock="true"
+                                                    placeholder="Enter full name"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+                                                <input 
+                                                    type="date" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.dateOfBirth"
+                                                    data-mock="true"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="resident.gender" data-mock="true">
+                                                    <option value="">Select gender</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="female">Female</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">National ID *</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.nationalId"
+                                                    data-mock="true"
+                                                    placeholder="Enter national ID"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                                <input 
+                                                    type="email" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.email"
+                                                    data-mock="true"
+                                                    placeholder="Enter email address"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                                <input 
+                                                    type="tel" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.phone"
+                                                    data-mock="true"
+                                                    placeholder="Enter phone number"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Training Information Section -->
+                                    <div class="border-b border-gray-200 pb-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Training Information</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="resident.department" data-mock="true">
+                                                    <option value="">Select department</option>
+                                                    <option value="cardiology">Cardiology</option>
+                                                    <option value="neurology">Neurology</option>
+                                                    <option value="emergency">Emergency Medicine</option>
+                                                    <option value="surgery">Surgery</option>
+                                                    <option value="pediatrics">Pediatrics</option>
+                                                    <option value="internal">Internal Medicine</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Specialization</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.specialization"
+                                                    data-mock="true"
+                                                    placeholder="Enter specialization"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Training Start Date *</label>
+                                                <input 
+                                                    type="date" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.startDate"
+                                                    data-mock="true"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Expected End Date</label>
+                                                <input 
+                                                    type="date" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.endDate"
+                                                    data-mock="true"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Supervisor *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="resident.supervisor" data-mock="true">
+                                                    <option value="">Select supervisor</option>
+                                                    <option value="dr-smith">Dr. John Smith</option>
+                                                    <option value="dr-jones">Dr. Mary Jones</option>
+                                                    <option value="dr-wilson">Dr. Robert Wilson</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Training Level</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="resident.level" data-mock="true">
+                                                    <option value="">Select level</option>
+                                                    <option value="r1">R1 (First Year)</option>
+                                                    <option value="r2">R2 (Second Year)</option>
+                                                    <option value="r3">R3 (Third Year)</option>
+                                                    <option value="r4">R4 (Fourth Year)</option>
+                                                    <option value="fellow">Fellow</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Emergency Contact Section -->
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Name</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.emergencyContact.name"
+                                                    data-mock="true"
+                                                    placeholder="Enter contact name"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Phone</label>
+                                                <input 
+                                                    type="tel" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.emergencyContact.phone"
+                                                    data-mock="true"
+                                                    placeholder="Enter contact phone"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Relationship</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="resident.emergencyContact.relationship"
+                                                    data-mock="true"
+                                                    placeholder="e.g., Spouse, Parent, Sibling"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end space-x-4 pt-6">
+                                        <button 
+                                            type="button" 
+                                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                            data-event="click:resetForm"
+                                        >
+                                            Reset
+                                        </button>
+                                        <button 
+                                            type="submit" 
+                                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
+                                            data-implementation="Should validate form and save resident data"
+                                        >
+                                            Register Resident
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: ResidentRegistrationForm -->
+
+                    <!-- Faculty Registration Form -->
+                    <!-- @COMPONENT: FacultyRegistrationForm [Faculty member registration] -->
+                    <div id="faculty-form" class="space-y-6" style="display: none;">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Faculty Registration</h2>
+                            <button class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600" data-event="click:goBack">
+                                <i class="fas fa-arrow-left mr-2"></i>Back
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="p-6">
+                                <form class="space-y-6" data-event="submit:handleFacultyRegistration">
+                                    
+                                    <!-- Personal Information Section -->
+                                    <div class="border-b border-gray-200 pb-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.fullName"
+                                                    data-mock="true"
+                                                    placeholder="Enter full name"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="faculty.title" data-mock="true">
+                                                    <option value="">Select title</option>
+                                                    <option value="dr">Dr.</option>
+                                                    <option value="prof">Prof.</option>
+                                                    <option value="assoc-prof">Assoc. Prof.</option>
+                                                    <option value="asst-prof">Asst. Prof.</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                                <input 
+                                                    type="email" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.email"
+                                                    data-mock="true"
+                                                    placeholder="Enter email address"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                                <input 
+                                                    type="tel" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.phone"
+                                                    data-mock="true"
+                                                    placeholder="Enter phone number"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Professional Information Section -->
+                                    <div class="border-b border-gray-200 pb-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Professional Information</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="faculty.department" data-mock="true">
+                                                    <option value="">Select department</option>
+                                                    <option value="cardiology">Cardiology</option>
+                                                    <option value="neurology">Neurology</option>
+                                                    <option value="emergency">Emergency Medicine</option>
+                                                    <option value="surgery">Surgery</option>
+                                                    <option value="pediatrics">Pediatrics</option>
+                                                    <option value="internal">Internal Medicine</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Position *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="faculty.position" data-mock="true">
+                                                    <option value="">Select position</option>
+                                                    <option value="attending">Attending Physician</option>
+                                                    <option value="chief">Department Chief</option>
+                                                    <option value="director">Program Director</option>
+                                                    <option value="coordinator">Training Coordinator</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Specialization</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.specialization"
+                                                    data-mock="true"
+                                                    placeholder="Enter specialization"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
+                                                <input 
+                                                    type="number" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.experience"
+                                                    data-mock="true"
+                                                    placeholder="Enter years of experience"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Medical License Number</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.licenseNumber"
+                                                    data-mock="true"
+                                                    placeholder="Enter license number"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Board Certifications</label>
+                                                <input 
+                                                    type="text" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.certifications"
+                                                    data-mock="true"
+                                                    placeholder="Enter certifications (comma separated)"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Information Section -->
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+                                        <div class="grid grid-cols-1 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Biography</label>
+                                                <textarea 
+                                                    rows="4" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.biography"
+                                                    data-mock="true"
+                                                    placeholder="Enter brief biography..."
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Research Interests</label>
+                                                <textarea 
+                                                    rows="3" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="faculty.researchInterests"
+                                                    data-mock="true"
+                                                    placeholder="Enter research interests..."
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end space-x-4 pt-6">
+                                        <button 
+                                            type="button" 
+                                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                            data-event="click:resetForm"
+                                        >
+                                            Reset
+                                        </button>
+                                        <button 
+                                            type="submit" 
+                                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
+                                            data-implementation="Should validate form and save faculty data"
+                                        >
+                                            Register Faculty
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: FacultyRegistrationForm -->
+
+                    <!-- Training Forms Interface -->
+                    <!-- @COMPONENT: TrainingFormsInterface [9 mandatory forms management] -->
+                    <div id="training-forms" class="space-y-6" style="display: none;">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Training Forms</h2>
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700" data-event="click:showNewFormModal">
+                                <i class="fas fa-plus mr-2"></i>New Form
+                            </button>
+                        </div>
+
+                        <!-- Forms Overview Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- @MAP: mandatoryForms.map(form => ( -->
+                            <div class="bg-white rounded-lg shadow p-6" data-mock="true">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <span class="text-primary font-bold" data-bind="form.code">J</span>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-lg font-semibold text-gray-900" data-bind="form.title">Initial Assessment Form</h3>
+                                            <p class="text-sm text-gray-600" data-bind="form.description">Basic evaluation form</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Completed:</span>
+                                        <span class="font-medium" data-bind="form.completed">45</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Pending:</span>
+                                        <span class="font-medium text-yellow-600" data-bind="form.pending">12</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Overdue:</span>
+                                        <span class="font-medium text-red-600" data-bind="form.overdue">3</span>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200" data-event="click:viewFormDetails">
+                                    View Details
+                                </button>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow p-6" data-mock="true">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <span class="text-secondary font-bold" data-bind="form.code">F</span>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-lg font-semibold text-gray-900" data-bind="form.title">Mid-Training Review</h3>
+                                            <p class="text-sm text-gray-600" data-bind="form.description">Performance evaluation</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Completed:</span>
+                                        <span class="font-medium" data-bind="form.completed">38</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Pending:</span>
+                                        <span class="font-medium text-yellow-600" data-bind="form.pending">8</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Overdue:</span>
+                                        <span class="font-medium text-red-600" data-bind="form.overdue">1</span>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200" data-event="click:viewFormDetails">
+                                    View Details
+                                </button>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow p-6" data-mock="true">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                            <span class="text-yellow-600 font-bold" data-bind="form.code">D</span>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-lg font-semibold text-gray-900" data-bind="form.title">Clinical Skills Assessment</h3>
+                                            <p class="text-sm text-gray-600" data-bind="form.description">Practical evaluation</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Completed:</span>
+                                        <span class="font-medium" data-bind="form.completed">42</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Pending:</span>
+                                        <span class="font-medium text-yellow-600" data-bind="form.pending">15</span>
+                                    </div>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Overdue:</span>
+                                        <span class="font-medium text-red-600" data-bind="form.overdue">2</span>
+                                    </div>
+                                </div>
+                                <button class="w-full mt-4 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200" data-event="click:viewFormDetails">
+                                    View Details
+                                </button>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+
+                        <!-- Form Details View -->
+                        <!-- @COMPONENT: FormDetailsView [Individual form management] -->
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-900">Form J - Initial Assessment</h3>
+                                    <div class="flex space-x-2">
+                                        <button class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-blue-700" data-event="click:createNewFormInstance">
+                                            Create New
+                                        </button>
+                                        <button class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200" data-event="click:exportFormData">
+                                            Export
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6">
+                                <!-- Form Instance List -->
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resident</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <!-- @MAP: formInstances.map(instance => ( -->
+                                            <tr data-mock="true">
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                                            <i class="fas fa-user text-gray-600 text-xs"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <div class="text-sm font-medium text-gray-900" data-bind="instance.residentName">Dr. Sarah Johnson</div>
+                                                            <div class="text-sm text-gray-500" data-bind="instance.residentId">RES-001</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-bind="instance.department">Cardiology</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800" data-bind="instance.status">
+                                                        Completed
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-bind="instance.lastUpdated">Dec 15, 2024</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-primary hover:text-blue-900 mr-3" data-event="click:viewForm">View</button>
+                                                    <button class="text-green-600 hover:text-green-900 mr-3" data-event="click:editForm">Edit</button>
+                                                    <button class="text-red-600 hover:text-red-900" data-event="click:deleteForm">Delete</button>
+                                                </td>
+                                            </tr>
+                                            
+                                            <tr data-mock="true">
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center">
+                                                        <div class="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                                            <i class="fas fa-user text-gray-600 text-xs"></i>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <div class="text-sm font-medium text-gray-900" data-bind="instance.residentName">Dr. Michael Chen</div>
+                                                            <div class="text-sm text-gray-500" data-bind="instance.residentId">RES-002</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-bind="instance.department">Neurology</td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800" data-bind="instance.status">
+                                                        Pending
+                                                    </span>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-bind="instance.lastUpdated">Dec 12, 2024</td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button class="text-primary hover:text-blue-900 mr-3" data-event="click:viewForm">View</button>
+                                                    <button class="text-green-600 hover:text-green-900 mr-3" data-event="click:editForm">Edit</button>
+                                                    <button class="text-red-600 hover:text-red-900" data-event="click:deleteForm">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <!-- @END_MAP )) -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: FormDetailsView -->
+                    </div>
+                    <!-- @END_COMPONENT: TrainingFormsInterface -->
+
+                    <!-- Sample Form J Interface -->
+                    <!-- @COMPONENT: FormJInterface [Initial Assessment Form] -->
+                    <div id="form-j-interface" class="space-y-6" style="display: none;">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Form J - Initial Assessment</h2>
+                            <div class="flex space-x-2">
+                                <button class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600" data-event="click:goBack">
+                                    <i class="fas fa-arrow-left mr-2"></i>Back
+                                </button>
+                                <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" data-event="click:saveForm">
+                                    <i class="fas fa-save mr-2"></i>Save
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="p-6">
+                                <form class="space-y-6" data-event="submit:handleFormJSubmission">
+                                    
+                                    <!-- Resident Information -->
+                                    <div class="border-b border-gray-200 pb-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Resident Information</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Resident Name *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="formJ.residentId" data-mock="true">
+                                                    <option value="">Select resident</option>
+                                                    <option value="res-001">Dr. Sarah Johnson</option>
+                                                    <option value="res-002">Dr. Michael Chen</option>
+                                                    <option value="res-003">Dr. Lisa Rodriguez</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Evaluation Date *</label>
+                                                <input 
+                                                    type="date" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="formJ.evaluationDate"
+                                                    data-mock="true"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Evaluator *</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="formJ.evaluatorId" data-mock="true">
+                                                    <option value="">Select evaluator</option>
+                                                    <option value="fac-001">Dr. John Smith</option>
+                                                    <option value="fac-002">Dr. Mary Jones</option>
+                                                    <option value="fac-003">Dr. Robert Wilson</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Assessment Categories -->
+                                    <div class="border-b border-gray-200 pb-6">
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Clinical Assessment</h3>
+                                        
+                                        <div class="space-y-6">
+                                            <!-- Medical Knowledge -->
+                                            <div>
+                                                <h4 class="text-md font-medium text-gray-800 mb-3">Medical Knowledge</h4>
+                                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Basic Sciences</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.medicalKnowledge.basicSciences" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Clinical Knowledge</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.medicalKnowledge.clinicalKnowledge" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Problem Solving</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.medicalKnowledge.problemSolving" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Evidence-Based Medicine</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.medicalKnowledge.evidenceBased" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Overall Score</label>
+                                                        <input 
+                                                            type="number" 
+                                                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50" 
+                                                            data-bind="formJ.medicalKnowledge.overall"
+                                                            data-mock="true"
+                                                            readonly
+                                                            placeholder="Auto-calculated"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Patient Care -->
+                                            <div>
+                                                <h4 class="text-md font-medium text-gray-800 mb-3">Patient Care</h4>
+                                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">History Taking</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.patientCare.historyTaking" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Physical Examination</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.patientCare.physicalExam" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Diagnosis</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.patientCare.diagnosis" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Treatment Planning</label>
+                                                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="formJ.patientCare.treatmentPlanning" data-mock="true">
+                                                            <option value="">Rate</option>
+                                                            <option value="1">1 - Poor</option>
+                                                            <option value="2">2 - Below Average</option>
+                                                            <option value="3">3 - Average</option>
+                                                            <option value="4">4 - Good</option>
+                                                            <option value="5">5 - Excellent</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-sm text-gray-600 mb-2">Overall Score</label>
+                                                        <input 
+                                                            type="number" 
+                                                            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50" 
+                                                            data-bind="formJ.patientCare.overall"
+                                                            data-mock="true"
+                                                            readonly
+                                                            placeholder="Auto-calculated"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Comments and Recommendations -->
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Comments and Recommendations</h3>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Strengths</label>
+                                                <textarea 
+                                                    rows="3" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="formJ.comments.strengths"
+                                                    data-mock="true"
+                                                    placeholder="Describe resident's strengths..."
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Areas for Improvement</label>
+                                                <textarea 
+                                                    rows="3" 
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    data-bind="formJ.comments.improvements"
+                                                    data-mock="true"
+                                                    placeholder="Describe areas that need improvement..."
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Overall Recommendation</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" data-bind="formJ.recommendation" data-mock="true">
+                                                    <option value="">Select recommendation</option>
+                                                    <option value="excellent">Excellent Progress</option>
+                                                    <option value="satisfactory">Satisfactory Progress</option>
+                                                    <option value="needs-improvement">Needs Improvement</option>
+                                                    <option value="unsatisfactory">Unsatisfactory</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end space-x-4 pt-6">
+                                        <button 
+                                            type="button" 
+                                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                            data-event="click:saveDraft"
+                                        >
+                                            Save as Draft
+                                        </button>
+                                        <button 
+                                            type="submit" 
+                                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700"
+                                            data-implementation="Should validate and submit form"
+                                        >
+                                            Submit Form
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: FormJInterface -->
+
+                    <!-- Reports Module -->
+                    <!-- @COMPONENT: ReportsModule [Comprehensive reporting system] -->
+                    <div id="reports-module" class="space-y-6" style="display: none;">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-900">Reports</h2>
+                            <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700" data-event="click:generateCustomReport">
+                                <i class="fas fa-plus mr-2"></i>Custom Report
+                            </button>
+                        </div>
+
+                        <!-- Report Categories -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" data-event="click:selectReportType" data-type="residents">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-user-md text-primary text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Resident Reports</h3>
+                                        <p class="text-sm text-gray-600">Individual and summary reports</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" data-event="click:selectReportType" data-type="forms">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-green-100 rounded-lg">
+                                        <i class="fas fa-clipboard-list text-secondary text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Form Reports</h3>
+                                        <p class="text-sm text-gray-600">Training form analytics</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" data-event="click:selectReportType" data-type="faculty">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-yellow-100 rounded-lg">
+                                        <i class="fas fa-chalkboard-teacher text-yellow-600 text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Faculty Reports</h3>
+                                        <p class="text-sm text-gray-600">Faculty performance metrics</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-lg transition-shadow" data-event="click:selectReportType" data-type="discipline">
+                                <div class="flex items-center">
+                                    <div class="p-3 bg-red-100 rounded-lg">
+                                        <i class="fas fa-exclamation-triangle text-accent text-xl"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Discipline Reports</h3>
+                                        <p class="text-sm text-gray-600">Disciplinary actions tracking</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Builder Interface -->
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="p-6 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-900">Report Builder</h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    
+                                    <!-- Report Configuration -->
+                                    <div class="lg:col-span-1">
+                                        <h4 class="text-md font-medium text-gray-800 mb-4">Configuration</h4>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md" data-bind="reportConfig.type" data-mock="true">
+                                                    <option value="">Select type</option>
+                                                    <option value="resident-summary">Resident Summary</option>
+                                                    <option value="resident-detail">Resident Detail</option>
+                                                    <option value="form-completion">Form Completion Status</option>
+                                                    <option value="performance-analysis">Performance Analysis</option>
+                                                    <option value="faculty-workload">Faculty Workload</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="reportConfig.startDate" data-mock="true" />
+                                                    <input type="date" class="px-3 py-2 border border-gray-300 rounded-md text-sm" data-bind="reportConfig.endDate" data-mock="true" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md" data-bind="reportConfig.department" data-mock="true">
+                                                    <option value="">All Departments</option>
+                                                    <option value="cardiology">Cardiology</option>
+                                                    <option value="neurology">Neurology</option>
+                                                    <option value="emergency">Emergency Medicine</option>
+                                                    <option value="surgery">Surgery</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Output Format</label>
+                                                <div class="space-y-2">
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="format" value="pdf" class="text-primary" data-bind="reportConfig.format" data-mock="true" />
+                                                        <span class="ml-2 text-sm">PDF</span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="format" value="excel" class="text-primary" data-bind="reportConfig.format" data-mock="true" />
+                                                        <span class="ml-2 text-sm">Excel</span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" name="format" value="web" class="text-primary" data-bind="reportConfig.format" data-mock="true" checked />
+                                                        <span class="ml-2 text-sm">Web View</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <button class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700" data-event="click:generateReport">
+                                                Generate Report
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Report Preview -->
+                                    <div class="lg:col-span-2">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h4 class="text-md font-medium text-gray-800">Report Preview</h4>
+                                            <div class="flex space-x-2">
+                                                <button class="text-sm bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200" data-event="click:printReport">
+                                                    <i class="fas fa-print mr-1"></i>Print
+                                                </button>
+                                                <button class="text-sm bg-primary text-white px-3 py-1 rounded hover:bg-blue-700" data-event="click:exportReport">
+                                                    <i class="fas fa-download mr-1"></i>Export
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 min-h-96">
+                                            <!-- Sample Report Content -->
+                                            <div class="text-center mb-6">
+                                                <h2 class="text-xl font-bold text-gray-900">Hospital Resident Management System</h2>
+                                                <h3 class="text-lg font-semibold text-gray-700">Resident Summary Report</h3>
+                                                <p class="text-sm text-gray-600">Generated on: <span data-bind="report.generatedDate" data-mock="true">December 20, 2024</span></p>
+                                            </div>
+                                            
+                                            <div class="space-y-4">
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-800 mb-2">Summary Statistics</h4>
+                                                    <div class="grid grid-cols-2 gap-4 text-sm">
+                                                        <div>Total Residents: <span class="font-medium">156</span></div>
+                                                        <div>Active Training Programs: <span class="font-medium">8</span></div>
+                                                        <div>Completed Forms: <span class="font-medium">1,240</span></div>
+                                                        <div>Pending Reviews: <span class="font-medium">23</span></div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-800 mb-2">Department Breakdown</h4>
+                                                    <div class="space-y-1 text-sm">
+                                                        <div class="flex justify-between">
+                                                            <span>Cardiology</span>
+                                                            <span class="font-medium">32 residents</span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span>Neurology</span>
+                                                            <span class="font-medium">28 residents</span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span>Emergency Medicine</span>
+                                                            <span class="font-medium">45 residents</span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span>Surgery</span>
+                                                            <span class="font-medium">51 residents</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: ReportsModule -->
+
+                </main>
+                <!-- @END_COMPONENT: MainContent -->
+            </div>
+        </div>
+        <!-- @END_COMPONENT: Dashboard -->
+    </div>
+    <!-- @END_COMPONENT: AppContainer -->
+
+    <script>
+        // TODO: Implement React component structure and state management
+        // TODO: Add form validation logic
+        // TODO: Implement API integration for CRUD operations
+        // TODO: Add role-based access control
+        // TODO: Implement PDF generation for reports
+        // TODO: Add print stylesheet for report printing
+        
+        (function() {
+            // Basic navigation simulation for mockup demonstration
+            const navItems = document.querySelectorAll('[data-nav]');
+            const views = {
+                'dashboard': document.getElementById('dashboard-view'),
+                'residents': document.getElementById('resident-form'),
+                'faculty': document.getElementById('faculty-form'),
+                'forms': document.getElementById('training-forms'),
+                'reports': document.getElementById('reports-module')
+            };
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetView = this.getAttribute('data-nav');
+                    
+                    // Hide all views
+                    Object.values(views).forEach(view => {
+                        if (view) view.style.display = 'none';
+                    });
+                    
+                    // Show target view
+                    if (views[targetView]) {
+                        views[targetView].style.display = 'block';
+                    }
+                    
+                    // Update active navigation
+                    navItems.forEach(nav => nav.classList.remove('text-primary', 'bg-blue-50'));
+                    navItems.forEach(nav => nav.classList.add('text-gray-700'));
+                    this.classList.remove('text-gray-700');
+                    this.classList.add('text-primary', 'bg-blue-50');
+                });
+            });
+
+            // Show dashboard by default
+            if (views['dashboard']) {
+                views['dashboard'].style.display = 'block';
+            }
+
+            // Login simulation
+            const loginPage = document.getElementById('login-page');
+            const dashboard = document.getElementById('dashboard');
+            const loginForm = loginPage.querySelector('form');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                loginPage.style.display = 'none';
+                dashboard.style.display = 'block';
+            });
+        })();
+    </script>
+</body>
+</html>
