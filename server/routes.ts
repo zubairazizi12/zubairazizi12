@@ -15,7 +15,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Demo Auth middleware
   await setupDemoAuth(app);
 
-  // Auth routes
+  // Auth routes are handled in setupDemoAuth
+
   app.get('/api/auth/user', isDemoAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
