@@ -22,17 +22,17 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Express.js** server with TypeScript for API endpoints
 - **RESTful API design** with organized route handlers
-- **Session-based authentication** using PostgreSQL session store
+- **Session-based authentication** using MongoDB session store
 - **Replit Auth integration** for OAuth-based user authentication
 - **Role-based access control** (admin/viewer permissions)
 - **Middleware pattern** for request logging and error handling
 
 ### Data Layer
-- **PostgreSQL** database with connection pooling via Neon serverless
-- **Drizzle ORM** for type-safe database queries and schema management
-- **Database schema** includes tables for users, residents, faculty, forms, disciplinary actions, rewards, and sessions
+- **MongoDB** database for flexible document-based storage
+- **Mongoose ODM** for schema modeling and database operations
+- **Database collections** include users, residents, faculty, forms, disciplinary actions, rewards, and sessions
 - **Schema validation** using Zod for runtime type checking
-- **Relational data modeling** with foreign key constraints
+- **Document-based data modeling** with embedded and referenced relationships
 
 ### Key Features
 - **Resident Management**: Complete CRUD operations for resident profiles with department assignment and status tracking
@@ -52,15 +52,15 @@ Preferred communication style: Simple, everyday language.
 
 ## External Dependencies
 
-### Database & ORM
-- **PostgreSQL** via Neon serverless for cloud database hosting
-- **Drizzle ORM** with Drizzle Kit for schema migrations and database introspection
+### Database & ODM
+- **MongoDB** for document-based database storage
+- **Mongoose** ODM for schema modeling and database operations
 
 ### Authentication
 - **Replit Auth** OAuth provider integration
 - **OpenID Connect** client for authentication flow
 - **Passport.js** strategy for session management
-- **connect-pg-simple** for PostgreSQL session storage
+- **connect-mongo** for MongoDB session storage
 
 ### UI Framework
 - **Radix UI** primitives for accessible component foundation

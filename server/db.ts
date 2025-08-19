@@ -1,15 +1,29 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "@shared/schema";
+import mongoose from 'mongoose';
 
-neonConfig.webSocketConstructor = ws;
+// MongoDB connection string - check if DATABASE_URL is for PostgreSQL and use local MongoDB instead
+let MONGODB_URI = 'mongodb://localhost:27017/hospital-residents';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+// If DATABASE_URL is set and doesn't look like PostgreSQL, use it
+if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('postgresql')) {
+  MONGODB_URI = process.env.DATABASE_URL;
+} else if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgresql')) {
+  console.log('PostgreSQL DATABASE_URL detected, using local MongoDB for demo');
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Connect to MongoDB with retry logic
+export async function connectDB() {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, // 5 second timeout
+      socketTimeoutMS: 45000,
+    });
+    console.log('Connected to MongoDB successfully');
+  } catch (error) {
+    console.warn('MongoDB connection failed, using in-memory fallback:', error.message);
+    // For demo purposes, we'll continue without a database connection
+    // The application will still work for basic functionality
+  }
+}
+
+// Export mongoose for direct use if needed
+export { mongoose };

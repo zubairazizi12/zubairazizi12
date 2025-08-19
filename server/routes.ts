@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupDemoAuth, isDemoAuthenticated } from "./demoAuth";
 import { 
   insertResidentSchema,
   insertFacultySchema,
@@ -12,11 +12,11 @@ import {
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Demo Auth middleware
+  await setupDemoAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', isDemoAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -28,7 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Resident routes
-  app.get("/api/residents", isAuthenticated, async (req, res) => {
+  app.get("/api/residents", isDemoAuthenticated, async (req, res) => {
     try {
       const residents = await storage.getAllResidents();
       res.json(residents);
@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/residents/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/residents/:id", isDemoAuthenticated, async (req, res) => {
     try {
       const resident = await storage.getResident(req.params.id);
       if (!resident) {
@@ -51,7 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/residents", isAuthenticated, async (req: any, res) => {
+  app.post("/api/residents", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -70,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/residents/:id", isAuthenticated, async (req: any, res) => {
+  app.put("/api/residents/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -89,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/residents/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/residents/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Faculty routes
-  app.get("/api/faculty", isAuthenticated, async (req, res) => {
+  app.get("/api/faculty", isDemoAuthenticated, async (req, res) => {
     try {
       const faculty = await storage.getAllFaculty();
       res.json(faculty);
@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/faculty", isAuthenticated, async (req: any, res) => {
+  app.post("/api/faculty", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -134,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/faculty/:id", isAuthenticated, async (req: any, res) => {
+  app.put("/api/faculty/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -153,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/faculty/:id", isAuthenticated, async (req: any, res) => {
+  app.delete("/api/faculty/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -169,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Form routes
-  app.get("/api/residents/:residentId/forms", isAuthenticated, async (req, res) => {
+  app.get("/api/residents/:residentId/forms", isDemoAuthenticated, async (req, res) => {
     try {
       const forms = await storage.getResidentForms(req.params.residentId);
       res.json(forms);
@@ -179,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/forms", isAuthenticated, async (req: any, res) => {
+  app.post("/api/forms", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -198,7 +198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/forms/:id", isAuthenticated, async (req: any, res) => {
+  app.put("/api/forms/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -218,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Disciplinary action routes
-  app.get("/api/residents/:residentId/disciplinary-actions", isAuthenticated, async (req, res) => {
+  app.get("/api/residents/:residentId/disciplinary-actions", isDemoAuthenticated, async (req, res) => {
     try {
       const actions = await storage.getResidentDisciplinaryActions(req.params.residentId);
       res.json(actions);
@@ -228,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/disciplinary-actions", isAuthenticated, async (req: any, res) => {
+  app.post("/api/disciplinary-actions", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
@@ -251,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reward routes
-  app.get("/api/residents/:residentId/rewards", isAuthenticated, async (req, res) => {
+  app.get("/api/residents/:residentId/rewards", isDemoAuthenticated, async (req, res) => {
     try {
       const rewards = await storage.getResidentRewards(req.params.residentId);
       res.json(rewards);
@@ -261,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/rewards", isAuthenticated, async (req: any, res) => {
+  app.post("/api/rewards", isDemoAuthenticated, async (req: any, res) => {
     try {
       const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
