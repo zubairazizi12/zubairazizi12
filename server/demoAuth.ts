@@ -1,19 +1,18 @@
 import type { Express, RequestHandler } from "express";
 import session from "express-session";
-import MongoStore from "connect-mongo";
+import MemoryStore from "memorystore";
 import { storage } from "./storage";
 import { DEMO_CREDENTIALS } from "@shared/schema";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const mongoStore = MongoStore.create({
-    mongoUrl: 'mongodb://localhost:27017/hospital-residents',
-    touchAfter: 24 * 3600,
-  });
+  const MemoryStoreSession = MemoryStore(session);
   
   return session({
     secret: process.env.SESSION_SECRET || 'demo-secret-key-for-hospital-system',
-    store: mongoStore,
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    }),
     resave: false,
     saveUninitialized: false,
     cookie: {

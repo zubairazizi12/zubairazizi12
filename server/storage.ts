@@ -154,7 +154,7 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Resident not found');
     }
     
-    const updated = { ...existing, ...resident, updatedAt: new Date() };
+    const updated = { ...existing, ...resident, updatedAt: new Date() } as Resident;
     this.demoResidents.set(id, updated);
     return updated;
   }
@@ -165,119 +165,149 @@ export class DatabaseStorage implements IStorage {
 
   // Faculty operations
   async getAllFaculty(): Promise<Faculty[]> {
-    return await FacultyModel.find().sort({ createdAt: -1 });
+    return Array.from(this.demoFaculty.values()).sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   async getFaculty(id: string): Promise<Faculty | undefined> {
-    const facultyMember = await FacultyModel.findById(id);
-    return facultyMember || undefined;
+    return this.demoFaculty.get(id);
   }
 
   async createFaculty(facultyData: InsertFaculty): Promise<Faculty> {
-    const newFaculty = new FacultyModel(facultyData);
-    return await newFaculty.save();
+    const id = `faculty_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newFaculty: Faculty = {
+      _id: id,
+      ...facultyData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as Faculty;
+    
+    this.demoFaculty.set(id, newFaculty);
+    return newFaculty;
   }
 
   async updateFaculty(id: string, facultyData: Partial<InsertFaculty>): Promise<Faculty> {
-    const updatedFaculty = await FacultyModel.findByIdAndUpdate(
-      id,
-      { ...facultyData, updatedAt: new Date() },
-      { new: true }
-    );
-    if (!updatedFaculty) {
+    const existing = this.demoFaculty.get(id);
+    if (!existing) {
       throw new Error('Faculty not found');
     }
-    return updatedFaculty;
+    
+    const updated = { ...existing, ...facultyData, updatedAt: new Date() } as Faculty;
+    this.demoFaculty.set(id, updated);
+    return updated;
   }
 
   async deleteFaculty(id: string): Promise<void> {
-    await FacultyModel.findByIdAndDelete(id);
+    this.demoFaculty.delete(id);
   }
 
   // Form operations
   async getResidentForms(residentId: string): Promise<Form[]> {
-    return await FormModel.find({ residentId }).sort({ createdAt: -1 });
+    return Array.from(this.demoForms.values())
+      .filter(form => form.residentId === residentId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   async getForm(id: string): Promise<Form | undefined> {
-    const form = await FormModel.findById(id);
-    return form || undefined;
+    return this.demoForms.get(id);
   }
 
   async createForm(form: InsertForm): Promise<Form> {
-    const newForm = new FormModel(form);
-    return await newForm.save();
+    const id = `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newForm: Form = {
+      _id: id,
+      ...form,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as Form;
+    
+    this.demoForms.set(id, newForm);
+    return newForm;
   }
 
   async updateForm(id: string, form: Partial<InsertForm>): Promise<Form> {
-    const updatedForm = await FormModel.findByIdAndUpdate(
-      id,
-      { ...form, updatedAt: new Date() },
-      { new: true }
-    );
-    if (!updatedForm) {
+    const existing = this.demoForms.get(id);
+    if (!existing) {
       throw new Error('Form not found');
     }
-    return updatedForm;
+    
+    const updated = { ...existing, ...form, updatedAt: new Date() } as Form;
+    this.demoForms.set(id, updated);
+    return updated;
   }
 
   async deleteForm(id: string): Promise<void> {
-    await FormModel.findByIdAndDelete(id);
+    this.demoForms.delete(id);
   }
 
   // Disciplinary action operations
   async getResidentDisciplinaryActions(residentId: string): Promise<DisciplinaryAction[]> {
-    return await DisciplinaryActionModel.find({ residentId }).sort({ date: -1 });
+    return Array.from(this.demoDisciplinaryActions.values())
+      .filter(action => action.residentId === residentId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
   async createDisciplinaryAction(action: InsertDisciplinaryAction): Promise<DisciplinaryAction> {
-    const newAction = new DisciplinaryActionModel(action);
-    return await newAction.save();
+    const id = `disciplinary_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newAction: DisciplinaryAction = {
+      _id: id,
+      ...action,
+    } as DisciplinaryAction;
+    
+    this.demoDisciplinaryActions.set(id, newAction);
+    return newAction;
   }
 
   async updateDisciplinaryAction(
     id: string,
     action: Partial<InsertDisciplinaryAction>
   ): Promise<DisciplinaryAction> {
-    const updatedAction = await DisciplinaryActionModel.findByIdAndUpdate(
-      id,
-      action,
-      { new: true }
-    );
-    if (!updatedAction) {
+    const existing = this.demoDisciplinaryActions.get(id);
+    if (!existing) {
       throw new Error('Disciplinary action not found');
     }
-    return updatedAction;
+    
+    const updated = { ...existing, ...action } as DisciplinaryAction;
+    this.demoDisciplinaryActions.set(id, updated);
+    return updated;
   }
 
   async deleteDisciplinaryAction(id: string): Promise<void> {
-    await DisciplinaryActionModel.findByIdAndDelete(id);
+    this.demoDisciplinaryActions.delete(id);
   }
 
   // Reward operations
   async getResidentRewards(residentId: string): Promise<Reward[]> {
-    return await RewardModel.find({ residentId }).sort({ date: -1 });
+    return Array.from(this.demoRewards.values())
+      .filter(reward => reward.residentId === residentId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
   async createReward(reward: InsertReward): Promise<Reward> {
-    const newReward = new RewardModel(reward);
-    return await newReward.save();
+    const id = `reward_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newReward: Reward = {
+      _id: id,
+      ...reward,
+    } as Reward;
+    
+    this.demoRewards.set(id, newReward);
+    return newReward;
   }
 
   async updateReward(id: string, reward: Partial<InsertReward>): Promise<Reward> {
-    const updatedReward = await RewardModel.findByIdAndUpdate(
-      id,
-      reward,
-      { new: true }
-    );
-    if (!updatedReward) {
+    const existing = this.demoRewards.get(id);
+    if (!existing) {
       throw new Error('Reward not found');
     }
-    return updatedReward;
+    
+    const updated = { ...existing, ...reward } as Reward;
+    this.demoRewards.set(id, updated);
+    return updated;
   }
 
   async deleteReward(id: string): Promise<void> {
-    await RewardModel.findByIdAndDelete(id);
+    this.demoRewards.delete(id);
   }
 }
 
