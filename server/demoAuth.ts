@@ -60,7 +60,16 @@ export async function setupDemoAuth(app: Express) {
         role: credentials.role,
       });
 
-      res.json({ success: true, user: credentials });
+      res.json({ 
+        success: true, 
+        user: {
+          _id: credentials.id,
+          email: credentials.username,
+          firstName: credentials.firstName,
+          lastName: credentials.lastName,
+          role: credentials.role
+        }
+      });
     } else {
       res.status(401).json({ message: "Invalid credentials" });
     }
