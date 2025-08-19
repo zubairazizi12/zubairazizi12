@@ -1,0 +1,225 @@
+Project Specification Document (English)
+Project Title
+
+Hospital Resident Management System
+
+Project Description
+
+This project is a web-based Hospital Resident Management System built with React.js (frontend), Node.js/Express (backend), and MongoDB (database).
+
+The system will manage residents (specialist trainees) who are introduced to the hospital for training and specialization.
+
+For each resident, the system must store their personal details, training records, performance evaluations, disciplinary actions, and rewards.
+
+There are 9 mandatory forms (J, F, D, I, G, E, C, H, K) that must be filled during the resident’s training period. Each form has its own details and must be stored in the system separately for each resident.
+
+The system must also manage a faculty (trainers/doctors list) with detailed information about each faculty member.
+
+A reporting module is required, which allows detailed reports about residents, forms, disciplinary actions, rewards, and faculty to be generated, viewed, and printed.
+
+Users & Roles
+1. Admin User
+
+Full system access.
+
+Can manage residents (create, read, update, delete).
+
+Can manage the 9 training forms (J, F, D, I, G, E, C, H, K).
+
+Can record disciplinary actions (punishments).
+
+Can record rewards/achievements.
+
+Can manage faculty members (create, read, update, delete).
+
+Can generate reports (residents, forms, disciplinary actions, rewards, faculty).
+
+Can print reports.
+
+2. Viewer User
+
+Limited access (read-only).
+
+Can log in to the system.
+
+Can view resident data and their forms.
+
+Can view disciplinary actions and rewards.
+
+Can view faculty details.
+
+Can view and print reports.
+
+Cannot edit, delete, or add data.
+
+Main Features
+
+Authentication & Authorization
+
+Secure login for Admin and Viewer.
+
+Role-based access control.
+
+Resident Management
+
+Store personal details of each resident (name, age, gender, department, specialization start date, end date, etc.).
+
+Link each resident to 9 forms (J, F, D, I, G, E, C, H, K).
+
+Allow Admin to fill in and update these forms during training.
+
+Forms Management (J, F, D, I, G, E, C, H, K)
+
+Each form has its own structure and fields.
+
+Forms must be stored in MongoDB linked to the resident.
+
+Admin can create/update forms.
+
+Viewer can only view forms.
+
+Disciplinary Actions & Rewards
+
+Admin can log disciplinary actions (date, type of mistake, notes).
+
+Admin can log rewards/achievements (date, type of reward, description).
+
+Viewer can only view these records.
+
+Faculty Management
+
+Store faculty details (name, department, role, contact info).
+
+Admin can manage (add, update, delete).
+
+Viewer can only view.
+
+Reports Module (Very Important)
+
+Admin can generate detailed reports:
+
+Resident details with forms.
+
+Resident’s disciplinary/reward history.
+
+Faculty list.
+
+Overall summary reports.
+
+Viewer can only view and print reports.
+
+Reports should be exportable to PDF or printable directly.
+
+Database Structure (Example in MongoDB)
+
+Collection: Users
+
+_id
+
+username
+
+password (hashed)
+
+role (admin / viewer)
+
+Collection: Residents
+
+_id
+
+personalInfo (name, age, gender, department, startDate, endDate, etc.)
+
+forms: references to Forms collection
+
+disciplinaryActions: references to Discipline collection
+
+rewards: references to Rewards collection
+
+Collection: Forms
+
+_id
+
+residentId (reference to Residents)
+
+formType (J/F/D/I/G/E/C/H/K)
+
+formData (JSON structure depending on form type)
+
+createdAt
+
+updatedAt
+
+Collection: Discipline
+
+_id
+
+residentId
+
+date
+
+description
+
+actionTaken
+
+Collection: Rewards
+
+_id
+
+residentId
+
+date
+
+description
+
+rewardType
+
+Collection: Faculty
+
+_id
+
+name
+
+department
+
+role
+
+contactInfo
+
+Technology Stack
+
+Frontend: React.js (with TailwindCSS for UI, RTL support if needed)
+
+Backend: Node.js with Express.js
+
+Database: MongoDB (Mongoose ODM)
+
+Authentication: JWT (JSON Web Token)
+
+Reports/Printing: React-print or jsPDF for frontend reports export
+
+Deployment: Replit
+
+Expected Workflow
+
+Admin logs in → Dashboard with full controls.
+
+Admin registers a new resident → System creates profile with empty 9 forms.
+
+During training, Admin fills each of the 9 forms as required.
+
+If a resident makes a mistake, Admin records disciplinary action.
+
+If a resident achieves something, Admin records a reward.
+
+Admin manages faculty list (add/update/remove faculty).
+
+Reports can be generated at any time:
+
+Resident full profile + all forms.
+
+Resident disciplinary/reward history.
+
+Faculty list.
+
+Overall hospital resident statistics.
+
+Viewer logs in → can only view and print reports.
