@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const navigation = [
-  { name: 'Residents', href: '/residents', icon: Users },
-  { name: 'Faculty', href: '/faculty', icon: Presentation },
-  { name: 'Forms', href: '/forms', icon: FileText },
-  { name: 'Reports', href: '/reports', icon: BarChart3 },
+  { name: 'رزیدنت‌ها', href: '/residents', icon: Users },
+  { name: 'استادان', href: '/faculty', icon: Presentation },
+  { name: 'معلم‌ها', href: '/teachers', icon: Users },
+  { name: 'فرم‌ها', href: '/forms', icon: FileText },
+  { name: 'گزارشات', href: '/reports', icon: BarChart3 },
 ];
 
 export default function Sidebar() {
@@ -40,7 +41,7 @@ export default function Sidebar() {
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
               />
             </svg>
-            <span className="text-white font-semibold text-lg ml-3">HMS</span>
+            <span className="text-white font-semibold text-lg mr-3">سیستم مدیریت بیمارستان</span>
           </div>
         </div>
         
@@ -95,7 +96,7 @@ export default function Sidebar() {
             data-testid="button-logout"
           >
             <LogOut className="mr-3 h-5 w-5" />
-            Logout
+            خروج
           </Button>
         </div>
       </div>

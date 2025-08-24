@@ -82,6 +82,34 @@ const facultySchema = new Schema<IFaculty>({
 
 export const FacultyModel = mongoose.model<IFaculty>("Faculty", facultySchema);
 
+// Teacher Interface and Schema
+export interface ITeacher extends Document {
+  _id: string;
+  name: string;
+  department: string;
+  subject: string;
+  contactInfo: string;
+  experience: number;
+  status: string;
+  profileImageUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const teacherSchema = new Schema<ITeacher>({
+  name: { type: String, required: true },
+  department: { type: String, required: true },
+  subject: { type: String, required: true },
+  contactInfo: { type: String, required: true },
+  experience: { type: Number, required: true },
+  status: { type: String, required: true, default: "active" },
+  profileImageUrl: String,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+export const TeacherModel = mongoose.model<ITeacher>("Teacher", teacherSchema);
+
 // Forms Interface and Schema (J, F, D, I, G, E, C, H, K)
 export interface IForm extends Document {
   _id: string;
@@ -197,6 +225,16 @@ export const insertFacultySchema = z.object({
   profileImageUrl: z.string().optional(),
 });
 
+export const insertTeacherSchema = z.object({
+  name: z.string().min(1),
+  department: z.string().min(1),
+  subject: z.string().min(1),
+  contactInfo: z.string().min(1),
+  experience: z.number().min(0),
+  status: z.string().default("active"),
+  profileImageUrl: z.string().optional(),
+});
+
 export const insertFormSchema = z.object({
   residentId: z.string().min(1),
   formType: z.string().min(1),
@@ -238,6 +276,8 @@ export type InsertResident = z.infer<typeof insertResidentSchema>;
 export type Resident = IResident;
 export type InsertFaculty = z.infer<typeof insertFacultySchema>;
 export type Faculty = IFaculty;
+export type InsertTeacher = z.infer<typeof insertTeacherSchema>;
+export type Teacher = ITeacher;
 export type InsertForm = z.infer<typeof insertFormSchema>;
 export type Form = IForm;
 export type InsertDisciplinaryAction = z.infer<typeof insertDisciplinaryActionSchema>;

@@ -2,6 +2,7 @@ import {
   UserModel,
   ResidentModel,
   FacultyModel,
+  TeacherModel,
   FormModel,
   DisciplinaryActionModel,
   RewardModel,
@@ -11,6 +12,8 @@ import {
   type InsertResident,
   type Faculty,
   type InsertFaculty,
+  type Teacher,
+  type InsertTeacher,
   type Form,
   type InsertForm,
   type DisciplinaryAction,
@@ -41,6 +44,13 @@ export interface IStorage {
   updateFaculty(id: string, faculty: Partial<InsertFaculty>): Promise<Faculty>;
   deleteFaculty(id: string): Promise<void>;
 
+  // Teacher operations
+  getTeachers(): Promise<Teacher[]>;
+  getTeacher(id: string): Promise<Teacher | undefined>;
+  createTeacher(teacher: InsertTeacher): Promise<Teacher>;
+  updateTeacher(id: string, teacher: Partial<InsertTeacher>): Promise<Teacher>;
+  deleteTeacher(id: string): Promise<boolean>;
+
   // Form operations
   getResidentForms(residentId: string): Promise<Form[]>;
   getForm(id: string): Promise<Form | undefined>;
@@ -65,6 +75,7 @@ export class DatabaseStorage implements IStorage {
   private demoUsers: Map<string, User> = new Map();
   private demoResidents: Map<string, Resident> = new Map();
   private demoFaculty: Map<string, Faculty> = new Map();
+  private demoTeachers: Map<string, Teacher> = new Map();
   private demoForms: Map<string, Form> = new Map();
   private demoDisciplinaryActions: Map<string, DisciplinaryAction> = new Map();
   private demoRewards: Map<string, Reward> = new Map();
@@ -289,6 +300,97 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFaculty(id: string): Promise<void> {
     this.demoFaculty.delete(id);
+  }
+
+  // Teacher operations
+  async getTeachers(): Promise<Teacher[]> {
+    if (this.isMongoConnected) {
+      try {
+        const teachers = await TeacherModel.find({ status: 'active' })
+          .sort({ department: 1, name: 1 });
+        return teachers;
+      } catch (error) {
+        console.error('Error fetching teachers from MongoDB:', (error as Error).message);
+      }
+    }
+    return Array.from(this.demoTeachers.values()).sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async getTeacher(id: string): Promise<Teacher | undefined> {
+    if (this.isMongoConnected) {
+      try {
+        const teacher = await TeacherModel.findById(id);
+        return teacher || undefined;
+      } catch (error) {
+        console.error('Error fetching teacher from MongoDB:', (error as Error).message);
+      }
+    }
+    return this.demoTeachers.get(id);
+  }
+
+  async createTeacher(teacherData: InsertTeacher): Promise<Teacher> {
+    if (this.isMongoConnected) {
+      try {
+        const teacher = await TeacherModel.create(teacherData);
+        return teacher;
+      } catch (error) {
+        console.error('Error creating teacher in MongoDB:', (error as Error).message);
+      }
+    }
+    
+    const id = `teacher_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newTeacher: Teacher = {
+      _id: id,
+      ...teacherData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as Teacher;
+    
+    this.demoTeachers.set(id, newTeacher);
+    return newTeacher;
+  }
+
+  async updateTeacher(id: string, teacherData: Partial<InsertTeacher>): Promise<Teacher> {
+    if (this.isMongoConnected) {
+      try {
+        const teacher = await TeacherModel.findByIdAndUpdate(
+          id,
+          { ...teacherData, updatedAt: new Date() },
+          { new: true }
+        );
+        if (!teacher) {
+          throw new Error('Teacher not found');
+        }
+        return teacher;
+      } catch (error) {
+        console.error('Error updating teacher in MongoDB:', (error as Error).message);
+      }
+    }
+    
+    const existing = this.demoTeachers.get(id);
+    if (!existing) {
+      throw new Error('Teacher not found');
+    }
+    
+    const updated = { ...existing, ...teacherData, updatedAt: new Date() } as Teacher;
+    this.demoTeachers.set(id, updated);
+    return updated;
+  }
+
+  async deleteTeacher(id: string): Promise<boolean> {
+    if (this.isMongoConnected) {
+      try {
+        const result = await TeacherModel.findByIdAndDelete(id);
+        return result !== null;
+      } catch (error) {
+        console.error('Error deleting teacher from MongoDB:', (error as Error).message);
+        return false;
+      }
+    }
+    
+    return this.demoTeachers.delete(id);
   }
 
   // Form operations

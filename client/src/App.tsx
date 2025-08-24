@@ -8,6 +8,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Residents from "@/pages/residents";
 import FacultyPage from "@/pages/faculty";
+import Teachers from "@/pages/teachers";
 import Reports from "@/pages/reports";
 import NotFound from "@/pages/not-found";
 
@@ -23,6 +24,7 @@ function Router() {
           <Route path="/" component={Residents} />
           <Route path="/residents" component={Residents} />
           <Route path="/faculty" component={FacultyPage} />
+          <Route path="/teachers" component={Teachers} />
           <Route path="/reports" component={Reports} />
         </>
       )}

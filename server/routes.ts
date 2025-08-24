@@ -5,6 +5,7 @@ import { setupDemoAuth, isDemoAuthenticated } from "./demoAuth";
 import { 
   insertResidentSchema,
   insertFacultySchema,
+  insertTeacherSchema,
   insertFormSchema,
   insertDisciplinaryActionSchema,
   insertRewardSchema 
@@ -176,6 +177,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting faculty:", error);
       res.status(500).json({ message: "Failed to delete faculty" });
+    }
+  });
+
+  // Teacher routes
+  app.get("/api/teachers", isDemoAuthenticated, async (req, res) => {
+    try {
+      const teachers = await storage.getTeachers();
+      res.json(teachers);
+    } catch (error) {
+      console.error("Error fetching teachers:", error);
+      res.status(500).json({ message: "Failed to fetch teachers" });
+    }
+  });
+
+  app.get("/api/teachers/:id", isDemoAuthenticated, async (req, res) => {
+    try {
+      const teacher = await storage.getTeacher(req.params.id);
+      if (!teacher) {
+        return res.status(404).json({ message: "Teacher not found" });
+      }
+      res.json(teacher);
+    } catch (error) {
+      console.error("Error fetching teacher:", error);
+      res.status(500).json({ message: "Failed to fetch teacher" });
+    }
+  });
+
+  app.post("/api/teachers", isDemoAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const validatedData = insertTeacherSchema.parse(req.body);
+      const teacher = await storage.createTeacher(validatedData);
+      res.status(201).json(teacher);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error creating teacher:", error);
+      res.status(500).json({ message: "Failed to create teacher" });
+    }
+  });
+
+  app.put("/api/teachers/:id", isDemoAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const validatedData = insertTeacherSchema.partial().parse(req.body);
+      const teacher = await storage.updateTeacher(req.params.id, validatedData);
+      res.json(teacher);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      console.error("Error updating teacher:", error);
+      res.status(500).json({ message: "Failed to update teacher" });
+    }
+  });
+
+  app.delete("/api/teachers/:id", isDemoAuthenticated, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.user.claims.sub);
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const success = await storage.deleteTeacher(req.params.id);
+      if (!success) {
+        return res.status(404).json({ message: "Teacher not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting teacher:", error);
+      res.status(500).json({ message: "Failed to delete teacher" });
     }
   });
 
