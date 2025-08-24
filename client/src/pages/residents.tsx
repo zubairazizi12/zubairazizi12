@@ -34,7 +34,7 @@ export default function Residents() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Sidebar />
-        <div className="ml-64 p-6">
+        <div className="mr-64 p-6">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-slate-200 rounded w-64"></div>
             <div className="h-20 bg-slate-200 rounded"></div>
@@ -52,19 +52,19 @@ export default function Residents() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Sidebar />
-      <div className="ml-64 p-6">
+      <div className="mr-64 p-6">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 -m-6 mb-6">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-slate-900">Resident Management</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">مدیریت رزیدنت‌ها</h1>
             {user?.role === 'admin' && (
               <Button 
                 className="bg-hospital-green-600 hover:bg-hospital-green-700"
                 data-testid="button-add-resident"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Resident
+                <Plus className="h-4 w-4 ml-2" />
+                افزودن رزیدنت جدید
               </Button>
             )}
           </div>
@@ -76,22 +76,22 @@ export default function Residents() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+              <Search className="h-4 w-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
               <Input
                 type="text"
-                placeholder="Search residents..."
+                placeholder="جستجو رزیدنت‌ها..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-64"
+                className="pr-10 w-64"
                 data-testid="input-search-residents"
               />
             </div>
             <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
               <SelectTrigger className="w-48" data-testid="select-department-filter">
-                <SelectValue placeholder="All Departments" />
+                <SelectValue placeholder="همه بخش‌ها" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
+                <SelectItem value="all">همه بخش‌ها</SelectItem>
                 {departments.map((dept) => (
                   <SelectItem key={dept} value={dept}>{dept}</SelectItem>
                 ))}
@@ -99,7 +99,7 @@ export default function Residents() {
             </Select>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-slate-600">View:</span>
+            <span className="text-sm text-slate-600">نمایش:</span>
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
               size="sm"
@@ -132,7 +132,7 @@ export default function Residents() {
         ))}
         {filteredResidents.length === 0 && (
           <div className="text-center py-12 text-slate-500">
-            <p>No residents found matching your criteria.</p>
+            <p>هیچ رزیدنتی با این مشخصات یافت نشد.</p>
           </div>
         )}
       </div>

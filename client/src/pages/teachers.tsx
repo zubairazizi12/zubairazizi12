@@ -9,6 +9,7 @@ import TeacherTable from "@/components/teachers/teacher-table";
 import TeacherFormDialog from "@/components/forms/teacher-form-dialog";
 import { Teacher, InsertTeacher, insertTeacherSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import Sidebar from "@/components/layout/sidebar";
 
 export default function Teachers() {
   const { toast } = useToast();
@@ -126,18 +127,23 @@ export default function Teachers() {
 
   if (error) {
     return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-red-600">خطا در بارگذاری اطلاعات معلم‌ها</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-slate-50">
+        <Sidebar />
+        <div className="mr-64 p-6">
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-red-600">خطا در بارگذاری اطلاعات معلم‌ها</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50">
+      <Sidebar />
+      <div className="mr-64 p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight" data-testid="heading-teachers">
@@ -154,7 +160,7 @@ export default function Teachers() {
           }}
           data-testid="button-add-teacher"
         >
-          <Plus className="h-4 w-4 ml-2" />
+          <Plus className="h-4 w-4 mr-2" />
           افزودن معلم جدید
         </Button>
       </div>
@@ -169,12 +175,12 @@ export default function Teachers() {
         <CardContent>
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="جستجو بر اساس نام، بخش یا موضوع تدریس..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10"
+                className="pl-10"
                 data-testid="input-search-teachers"
               />
             </div>
@@ -210,6 +216,7 @@ export default function Teachers() {
         defaultValues={editingTeacher || undefined}
         isSubmitting={createTeacherMutation.isPending || updateTeacherMutation.isPending}
       />
+      </div>
     </div>
   );
 }

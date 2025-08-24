@@ -17,7 +17,7 @@ export default function FacultyPage() {
     return (
       <div className="min-h-screen bg-slate-50">
         <Sidebar />
-        <div className="ml-64 p-6">
+        <div className="mr-64 p-6">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-slate-200 rounded w-64"></div>
             <div className="h-96 bg-slate-200 rounded"></div>
@@ -30,19 +30,19 @@ export default function FacultyPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Sidebar />
-      <div className="ml-64 p-6">
+      <div className="mr-64 p-6">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 -m-6 mb-6">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-slate-900">Faculty Management</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">مدیریت هیئت علمی</h1>
             {user?.role === 'admin' && (
               <Button 
                 className="bg-hospital-green-600 hover:bg-hospital-green-700"
                 data-testid="button-add-faculty"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Faculty Member
+                <Plus className="h-4 w-4 ml-2" />
+                افزودن عضو هیئت علمی
               </Button>
             )}
           </div>
@@ -50,7 +50,7 @@ export default function FacultyPage() {
       </header>
 
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Faculty Members</h2>
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">اعضای هیئت علمی</h2>
       </div>
 
       <FacultyTable faculty={faculty} />
