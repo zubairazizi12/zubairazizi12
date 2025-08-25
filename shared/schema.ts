@@ -86,9 +86,25 @@ export const FacultyModel = mongoose.model<IFaculty>("Faculty", facultySchema);
 export interface ITeacher extends Document {
   _id: string;
   name: string;
-  department: string;
+  fatherName: string;
+  grandfatherName: string;
+  academicRank: string;
+  rankAchievementDate: Date;
+  trainerAppointmentDate: Date;
+  gender: string;
+  province: string;
   subject: string;
+  position: string;
+  hospital: string;
+  dateOfBirth: Date;
+  idNumber: string;
+  dutyStartDate: Date;
   contactInfo: string;
+  whatsappNumber: string;
+  emailAddress: string;
+  postCode: string;
+  appointmentType: string;
+  department: string;
   experience: number;
   status: string;
   profileImageUrl?: string;
@@ -98,9 +114,25 @@ export interface ITeacher extends Document {
 
 const teacherSchema = new Schema<ITeacher>({
   name: { type: String, required: true },
-  department: { type: String, required: true },
+  fatherName: { type: String, required: true },
+  grandfatherName: { type: String, required: true },
+  academicRank: { type: String, required: true },
+  rankAchievementDate: { type: Date, required: true },
+  trainerAppointmentDate: { type: Date, required: true },
+  gender: { type: String, required: true },
+  province: { type: String, required: true },
   subject: { type: String, required: true },
+  position: { type: String, required: true },
+  hospital: { type: String, required: true },
+  dateOfBirth: { type: Date, required: true },
+  idNumber: { type: String, required: true },
+  dutyStartDate: { type: Date, required: true },
   contactInfo: { type: String, required: true },
+  whatsappNumber: { type: String, required: true },
+  emailAddress: { type: String, required: true },
+  postCode: { type: String, required: true },
+  appointmentType: { type: String, required: true },
+  department: { type: String, required: true },
   experience: { type: Number, required: true },
   status: { type: String, required: true, default: "active" },
   profileImageUrl: String,
@@ -227,9 +259,25 @@ export const insertFacultySchema = z.object({
 
 export const insertTeacherSchema = z.object({
   name: z.string().min(1),
-  department: z.string().min(1),
+  fatherName: z.string().min(1),
+  grandfatherName: z.string().min(1),
+  academicRank: z.string().min(1),
+  rankAchievementDate: z.date(),
+  trainerAppointmentDate: z.date(),
+  gender: z.string().min(1),
+  province: z.string().min(1),
   subject: z.string().min(1),
+  position: z.string().min(1),
+  hospital: z.string().min(1),
+  dateOfBirth: z.date(),
+  idNumber: z.string().min(1),
+  dutyStartDate: z.date(),
   contactInfo: z.string().min(1),
+  whatsappNumber: z.string().min(1),
+  emailAddress: z.string().email(),
+  postCode: z.string().min(1),
+  appointmentType: z.string().min(1),
+  department: z.string().min(1),
   experience: z.number().min(0),
   status: z.string().default("active"),
   profileImageUrl: z.string().optional(),
