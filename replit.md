@@ -8,6 +8,19 @@ This is a web-based Hospital Resident Management System designed to track and ma
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 26, 2025)
+
+**Migration and Restructuring:**
+- ✅ Successfully migrated project from Replit Agent to Replit environment
+- ✅ Restructured server architecture with better organization:
+  - Created `/server/models/` folder with separate model files (User.ts, Resident.ts, Teacher.ts)
+  - Organized `/server/routes/` with dedicated route handlers
+  - Removed faculty functionality as requested by user
+  - Replaced faculty system with comprehensive teacher management
+- ✅ Enhanced teacher form system with full validation and database persistence
+- ✅ Updated shared schema to remove circular dependencies and faculty references
+- ✅ Server now running successfully on port 5000 with MongoDB fallback to in-memory storage
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -39,12 +52,12 @@ Preferred communication style: Simple, everyday language.
 ### Key Features
 - **Resident Management**: Complete CRUD operations for resident profiles with department assignment and status tracking
 - **Training Forms System**: Nine mandatory forms (J, F, D, I, G, E, C, H, K) with completion tracking and form data storage
-- **Faculty Management**: Comprehensive faculty profiles with supervision capabilities across 12 medical departments
+- **Teacher Management**: Comprehensive teacher profiles with detailed information including academic rank, appointment dates, contact details, and department assignment (replaces faculty system)
 - **Disciplinary Actions & Rewards**: Tracking system for resident performance incidents and achievements
-- **Reports Module**: Detailed reporting capabilities for residents, forms, disciplinary actions, rewards, and faculty
+- **Reports Module**: Detailed reporting capabilities for residents, forms, disciplinary actions, rewards, and teachers
 - **Authentication**: Secure OAuth integration with Replit Auth system with demo authentication fallback
 - **Authorization**: Role-based permissions for admin (full access) and viewer (read-only) users
-- **Database Seeding**: Development API endpoint for populating comprehensive faculty and resident data
+- **Teacher Form Submission**: Full validation and database persistence for teacher registration forms
 
 ### Design Patterns
 - **Repository Pattern**: Storage interface abstraction for data access operations

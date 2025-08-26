@@ -1,17 +1,9 @@
+import { UserModel, ResidentModel, TeacherModel } from "./models";
 import {
-  UserModel,
-  ResidentModel,
-  FacultyModel,
-  TeacherModel,
-  FormModel,
-  DisciplinaryActionModel,
-  RewardModel,
   type User,
   type UpsertUser,
   type Resident,
   type InsertResident,
-  type Faculty,
-  type InsertFaculty,
   type Teacher,
   type InsertTeacher,
   type Form,
@@ -23,7 +15,7 @@ import {
   DEMO_CREDENTIALS,
 } from "@shared/schema";
 import { connectDB } from "./db";
-import { seedDatabase } from "./seeds";
+// import { seedDatabase } from "./seeds"; // Removed
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -37,19 +29,13 @@ export interface IStorage {
   updateResident(id: string, resident: Partial<InsertResident>): Promise<Resident>;
   deleteResident(id: string): Promise<void>;
 
-  // Faculty operations
-  getAllFaculty(): Promise<Faculty[]>;
-  getFaculty(id: string): Promise<Faculty | undefined>;
-  createFaculty(faculty: InsertFaculty): Promise<Faculty>;
-  updateFaculty(id: string, faculty: Partial<InsertFaculty>): Promise<Faculty>;
-  deleteFaculty(id: string): Promise<void>;
+  // Teacher operations (replacing faculty)
 
-  // Teacher operations
-  getTeachers(): Promise<Teacher[]>;
+  getAllTeachers(): Promise<Teacher[]>;
   getTeacher(id: string): Promise<Teacher | undefined>;
   createTeacher(teacher: InsertTeacher): Promise<Teacher>;
   updateTeacher(id: string, teacher: Partial<InsertTeacher>): Promise<Teacher>;
-  deleteTeacher(id: string): Promise<boolean>;
+  deleteTeacher(id: string): Promise<void>;
 
   // Form operations
   getResidentForms(residentId: string): Promise<Form[]>;

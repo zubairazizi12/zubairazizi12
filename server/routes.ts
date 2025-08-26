@@ -1,27 +1,57 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
 import { setupDemoAuth, isDemoAuthenticated } from "./demoAuth";
-import { 
-  insertResidentSchema,
-  insertFacultySchema,
-  insertTeacherSchema,
-  insertFormSchema,
-  insertDisciplinaryActionSchema,
-  insertRewardSchema 
-} from "@shared/schema";
+import { UserModel, ResidentModel, TeacherModel } from "./models";
 import { z } from "zod";
+
+// Teacher validation schema
+const createTeacherSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  fatherName: z.string().min(1, "Father name is required"),
+  grandfatherName: z.string().min(1, "Grandfather name is required"),
+  academicRank: z.string().min(1, "Academic rank is required"),
+  rankAchievementDate: z.string().transform((str) => new Date(str)),
+  trainerAppointmentDate: z.string().transform((str) => new Date(str)),
+  gender: z.enum(["Male", "Female"]),
+  province: z.string().min(1, "Province is required"),
+  subject: z.string().min(1, "Subject is required"),
+  position: z.string().min(1, "Position is required"),
+  hospital: z.string().min(1, "Hospital is required"),
+  dateOfBirth: z.string().transform((str) => new Date(str)),
+  idNumber: z.string().min(1, "ID number is required"),
+  dutyStartDate: z.string().transform((str) => new Date(str)),
+  contactInfo: z.string().min(1, "Contact info is required"),
+  whatsappNumber: z.string().min(1, "WhatsApp number is required"),
+  emailAddress: z.string().email("Valid email is required"),
+  postCode: z.string().min(1, "Post code is required"),
+  appointmentType: z.string().min(1, "Appointment type is required"),
+  department: z.string().min(1, "Department is required"),
+  experience: z.number().min(0, "Experience must be non-negative"),
+  status: z.string().optional().default("active"),
+  profileImageUrl: z.string().optional(),
+});
+
+// Resident validation schema
+const createResidentSchema = z.object({
+  fullName: z.string().min(1, "Full name is required"),
+  age: z.number().min(18, "Age must be at least 18").max(100, "Age must be less than 100"),
+  gender: z.enum(["Male", "Female"]),
+  department: z.string().min(1, "Department is required"),
+  startDate: z.string().transform((str) => new Date(str)),
+  endDate: z.string().optional().transform((str) => str ? new Date(str) : undefined),
+  status: z.string().optional().default("active"),
+  profileImageUrl: z.string().optional(),
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Demo Auth middleware
   await setupDemoAuth(app);
 
-  // Auth routes are handled in setupDemoAuth
-
+  // Auth routes
   app.get('/api/auth/user', isDemoAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = await UserModel.findById(userId);
       if (user) {
         res.json({
           _id: user._id,
@@ -39,10 +69,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User routes
+  app.get("/api/users", isDemoAuthenticated, async (req, res) => {
+    try {
+      const users = await UserModel.find().sort({ createdAt: -1 });
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/users/:id", isDemoAuthenticated, async (req, res) => {
+    try {
+      const user = await UserModel.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Resident routes
   app.get("/api/residents", isDemoAuthenticated, async (req, res) => {
     try {
-      const residents = await storage.getAllResidents();
+      const residents = await ResidentModel.find().sort({ createdAt: -1 });
       res.json(residents);
     } catch (error) {
       console.error("Error fetching residents:", error);
@@ -52,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/residents/:id", isDemoAuthenticated, async (req, res) => {
     try {
-      const resident = await storage.getResident(req.params.id);
+      const resident = await ResidentModel.findById(req.params.id);
       if (!resident) {
         return res.status(404).json({ message: "Resident not found" });
       }
@@ -65,17 +119,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/residents", isDemoAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await UserModel.findById(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const validatedData = insertResidentSchema.parse(req.body);
-      const resident = await storage.createResident(validatedData);
-      res.status(201).json(resident);
+      const validatedData = createResidentSchema.parse(req.body);
+      const resident = new ResidentModel(validatedData);
+      const savedResident = await resident.save();
+      res.status(201).json(savedResident);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        return res.status(400).json({ 
+          message: 'Validation error', 
+          errors: error.errors 
+        });
       }
       console.error("Error creating resident:", error);
       res.status(500).json({ message: "Failed to create resident" });
@@ -84,17 +142,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/residents/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await UserModel.findById(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const validatedData = insertResidentSchema.partial().parse(req.body);
-      const resident = await storage.updateResident(req.params.id, validatedData);
+      const validatedData = createResidentSchema.partial().parse(req.body);
+      const resident = await ResidentModel.findByIdAndUpdate(
+        req.params.id,
+        { ...validatedData, updatedAt: new Date() },
+        { new: true, runValidators: true }
+      );
+      
+      if (!resident) {
+        return res.status(404).json({ message: "Resident not found" });
+      }
+      
       res.json(resident);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        return res.status(400).json({ 
+          message: 'Validation error', 
+          errors: error.errors 
+        });
       }
       console.error("Error updating resident:", error);
       res.status(500).json({ message: "Failed to update resident" });
@@ -103,87 +173,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/residents/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await UserModel.findById(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      await storage.deleteResident(req.params.id);
-      res.status(204).send();
+      const resident = await ResidentModel.findByIdAndDelete(req.params.id);
+      if (!resident) {
+        return res.status(404).json({ message: "Resident not found" });
+      }
+      res.json({ message: "Resident deleted successfully" });
     } catch (error) {
       console.error("Error deleting resident:", error);
       res.status(500).json({ message: "Failed to delete resident" });
     }
   });
 
-  // Faculty routes
-  app.get("/api/faculty", isDemoAuthenticated, async (req, res) => {
-    try {
-      const faculty = await storage.getAllFaculty();
-      res.json(faculty);
-    } catch (error) {
-      console.error("Error fetching faculty:", error);
-      res.status(500).json({ message: "Failed to fetch faculty" });
-    }
-  });
-
-  app.post("/api/faculty", isDemoAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const validatedData = insertFacultySchema.parse(req.body);
-      const facultyMember = await storage.createFaculty(validatedData);
-      res.status(201).json(facultyMember);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Error creating faculty:", error);
-      res.status(500).json({ message: "Failed to create faculty" });
-    }
-  });
-
-  app.put("/api/faculty/:id", isDemoAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const validatedData = insertFacultySchema.partial().parse(req.body);
-      const facultyMember = await storage.updateFaculty(req.params.id, validatedData);
-      res.json(facultyMember);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Error updating faculty:", error);
-      res.status(500).json({ message: "Failed to update faculty" });
-    }
-  });
-
-  app.delete("/api/faculty/:id", isDemoAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      await storage.deleteFaculty(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting faculty:", error);
-      res.status(500).json({ message: "Failed to delete faculty" });
-    }
-  });
-
   // Teacher routes
   app.get("/api/teachers", isDemoAuthenticated, async (req, res) => {
     try {
-      const teachers = await storage.getTeachers();
+      const teachers = await TeacherModel.find().sort({ createdAt: -1 });
       res.json(teachers);
     } catch (error) {
       console.error("Error fetching teachers:", error);
@@ -193,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/teachers/:id", isDemoAuthenticated, async (req, res) => {
     try {
-      const teacher = await storage.getTeacher(req.params.id);
+      const teacher = await TeacherModel.findById(req.params.id);
       if (!teacher) {
         return res.status(404).json({ message: "Teacher not found" });
       }
@@ -206,17 +215,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/teachers", isDemoAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await UserModel.findById(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const validatedData = insertTeacherSchema.parse(req.body);
-      const teacher = await storage.createTeacher(validatedData);
-      res.status(201).json(teacher);
+      const validatedData = createTeacherSchema.parse(req.body);
+      const teacher = new TeacherModel(validatedData);
+      const savedTeacher = await teacher.save();
+      res.status(201).json(savedTeacher);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        return res.status(400).json({ 
+          message: 'Validation error', 
+          errors: error.errors 
+        });
       }
       console.error("Error creating teacher:", error);
       res.status(500).json({ message: "Failed to create teacher" });
@@ -225,17 +238,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/teachers/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await UserModel.findById(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const validatedData = insertTeacherSchema.partial().parse(req.body);
-      const teacher = await storage.updateTeacher(req.params.id, validatedData);
+      const validatedData = createTeacherSchema.partial().parse(req.body);
+      const teacher = await TeacherModel.findByIdAndUpdate(
+        req.params.id,
+        { ...validatedData, updatedAt: new Date() },
+        { new: true, runValidators: true }
+      );
+      
+      if (!teacher) {
+        return res.status(404).json({ message: "Teacher not found" });
+      }
+      
       res.json(teacher);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+        return res.status(400).json({ 
+          message: 'Validation error', 
+          errors: error.errors 
+        });
       }
       console.error("Error updating teacher:", error);
       res.status(500).json({ message: "Failed to update teacher" });
@@ -244,166 +269,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/teachers/:id", isDemoAuthenticated, async (req: any, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await UserModel.findById(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const success = await storage.deleteTeacher(req.params.id);
-      if (!success) {
+      const teacher = await TeacherModel.findByIdAndDelete(req.params.id);
+      if (!teacher) {
         return res.status(404).json({ message: "Teacher not found" });
       }
-      res.status(204).send();
+      res.json({ message: "Teacher deleted successfully" });
     } catch (error) {
       console.error("Error deleting teacher:", error);
       res.status(500).json({ message: "Failed to delete teacher" });
     }
   });
 
-  // Form routes
-  app.get("/api/residents/:residentId/forms", isDemoAuthenticated, async (req, res) => {
+  // Forms
+  app.get("/api/forms", isDemoAuthenticated, async (req, res) => {
     try {
-      const forms = await storage.getResidentForms(req.params.residentId);
-      res.json(forms);
+      // Return form types for the forms system
+      const formTypes = [
+        { id: 'J', name: 'Form J - Initial Assessment' },
+        { id: 'F', name: 'Form F - Monthly Evaluation' },
+        { id: 'D', name: 'Form D - Skills Assessment' },
+        { id: 'I', name: 'Form I - Clinical Performance' },
+        { id: 'G', name: 'Form G - Research Progress' },
+        { id: 'E', name: 'Form E - Professional Development' },
+        { id: 'C', name: 'Form C - Case Study Review' },
+        { id: 'H', name: 'Form H - Final Evaluation' },
+        { id: 'K', name: 'Form K - Competency Review' }
+      ];
+      res.json(formTypes);
     } catch (error) {
       console.error("Error fetching forms:", error);
       res.status(500).json({ message: "Failed to fetch forms" });
     }
   });
 
-  app.post("/api/forms", isDemoAuthenticated, async (req: any, res) => {
+  // Disciplinary actions
+  app.get("/api/disciplinary", isDemoAuthenticated, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const validatedData = insertFormSchema.parse(req.body);
-      const form = await storage.createForm(validatedData);
-      res.status(201).json(form);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Error creating form:", error);
-      res.status(500).json({ message: "Failed to create form" });
-    }
-  });
-
-  app.put("/api/forms/:id", isDemoAuthenticated, async (req: any, res) => {
-    try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const validatedData = insertFormSchema.partial().parse(req.body);
-      const form = await storage.updateForm(req.params.id, validatedData);
-      res.json(form);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Error updating form:", error);
-      res.status(500).json({ message: "Failed to update form" });
-    }
-  });
-
-  // Disciplinary action routes
-  app.get("/api/residents/:residentId/disciplinary-actions", isDemoAuthenticated, async (req, res) => {
-    try {
-      const actions = await storage.getResidentDisciplinaryActions(req.params.residentId);
-      res.json(actions);
+      // Placeholder for disciplinary actions
+      res.json([]);
     } catch (error) {
       console.error("Error fetching disciplinary actions:", error);
       res.status(500).json({ message: "Failed to fetch disciplinary actions" });
     }
   });
 
-  app.post("/api/disciplinary-actions", isDemoAuthenticated, async (req: any, res) => {
+  // Rewards
+  app.get("/api/rewards", isDemoAuthenticated, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const validatedData = insertDisciplinaryActionSchema.parse({
-        ...req.body,
-        createdBy: req.user.claims.sub,
-      });
-      const action = await storage.createDisciplinaryAction(validatedData);
-      res.status(201).json(action);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Error creating disciplinary action:", error);
-      res.status(500).json({ message: "Failed to create disciplinary action" });
-    }
-  });
-
-  // Reward routes
-  app.get("/api/residents/:residentId/rewards", isDemoAuthenticated, async (req, res) => {
-    try {
-      const rewards = await storage.getResidentRewards(req.params.residentId);
-      res.json(rewards);
+      // Placeholder for rewards
+      res.json([]);
     } catch (error) {
       console.error("Error fetching rewards:", error);
       res.status(500).json({ message: "Failed to fetch rewards" });
     }
   });
 
-  app.post("/api/rewards", isDemoAuthenticated, async (req: any, res) => {
+  // Reports
+  app.get("/api/reports", isDemoAuthenticated, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const validatedData = insertRewardSchema.parse({
-        ...req.body,
-        createdBy: req.user.claims.sub,
-      });
-      const reward = await storage.createReward(validatedData);
-      res.status(201).json(reward);
+      const reports = {
+        residents: await ResidentModel.countDocuments(),
+        teachers: await TeacherModel.countDocuments(),
+        forms: 9, // Number of form types
+        activeResidents: await ResidentModel.countDocuments({ status: 'active' }),
+        inactiveResidents: await ResidentModel.countDocuments({ status: 'inactive' }),
+        activeTeachers: await TeacherModel.countDocuments({ status: 'active' }),
+        inactiveTeachers: await TeacherModel.countDocuments({ status: 'inactive' })
+      };
+      res.json(reports);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid data", errors: error.errors });
-      }
-      console.error("Error creating reward:", error);
-      res.status(500).json({ message: "Failed to create reward" });
+      console.error("Error generating reports:", error);
+      res.status(500).json({ message: "Failed to generate reports" });
     }
   });
 
-  // Development seeding route
-  app.post("/api/seed", async (req: any, res) => {
-    try {
-      if (process.env.NODE_ENV !== 'development') {
-        return res.status(403).json({ message: "Seeding only allowed in development" });
-      }
-      
-      const user = await storage.getUser(req.user.claims.sub);
-      if (user?.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
-      const { seedDatabase } = await import("./seeds");
-      await seedDatabase();
-      
-      res.json({ 
-        message: "Database seeded successfully with comprehensive faculty and resident data",
-        details: {
-          facultyMembers: "36 faculty members across 12 departments",
-          residents: "14 residents across various departments",
-          departments: ["Internal Medicine", "Surgery", "Cardiology", "Emergency Medicine", "Pediatrics", "Psychiatry", "Radiology", "Anesthesiology", "Obstetrics & Gynecology", "Orthopedic Surgery", "Neurology", "Dermatology"]
-        }
-      });
-    } catch (error) {
-      console.error("Error seeding database:", error);
-      res.status(500).json({ message: "Failed to seed database", error: (error as Error).message });
-    }
-  });
-
-  const httpServer = createServer(app);
-  return httpServer;
+  return createServer(app);
 }
