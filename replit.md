@@ -14,12 +14,14 @@ Preferred communication style: Simple, everyday language.
 - ✅ Successfully migrated project from Replit Agent to Replit environment
 - ✅ Restructured server architecture with better organization:
   - Created `/server/models/` folder with separate model files (User.ts, Resident.ts, Teacher.ts)
-  - Organized `/server/routes/` with dedicated route handlers
+  - Created `/server/controllers/` folder with UserController, ResidentController, TeacherController
+  - Organized `/server/routes/` with clean route definitions using controllers
   - Removed faculty functionality as requested by user
   - Replaced faculty system with comprehensive teacher management
 - ✅ Enhanced teacher form system with full validation and database persistence
 - ✅ Updated shared schema to remove circular dependencies and faculty references
 - ✅ Server now running successfully on port 5000 with MongoDB fallback to in-memory storage
+- ✅ Implemented MVC pattern with controllers for better code organization
 
 ## System Architecture
 
