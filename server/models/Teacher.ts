@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface ITeacher extends Document {
   _id: string;
   name: string;
+  lostname:string;
   fatherName: string;
   grandfatherName: string;
   academicRank: string;
@@ -31,6 +32,7 @@ export interface ITeacher extends Document {
 
 const teacherSchema = new Schema<ITeacher>({
   name: { type: String, required: true },
+  lostname: { type: String, required: true },
   fatherName: { type: String, required: true },
   grandfatherName: { type: String, required: true },
   academicRank: { type: String, required: true },

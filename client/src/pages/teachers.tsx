@@ -36,13 +36,13 @@ export default function Teachers() {
       setIsAddDialogOpen(false);
       toast({
         title: "موفقیت",
-        description: "معلم با موفقیت اضافه شد",
+        description: "استاد با موفقیت اضافه شد",
       });
     },
     onError: (error: any) => {
       toast({
         title: "خطا",
-        description: error.message || "خطا در افزودن معلم",
+        description: error.message || "خطا در افزودن استاد",
         variant: "destructive",
       });
     },
@@ -62,13 +62,13 @@ export default function Teachers() {
       setEditingTeacher(null);
       toast({
         title: "موفقیت",
-        description: "معلم با موفقیت بروزرسانی شد",
+        description: "استاد با موفقیت بروزرسانی شد",
       });
     },
     onError: (error: any) => {
       toast({
         title: "خطا",
-        description: error.message || "خطا در بروزرسانی معلم",
+        description: error.message || "خطا در بروزرسانی استاد",
         variant: "destructive",
       });
     },
@@ -82,13 +82,13 @@ export default function Teachers() {
       queryClient.invalidateQueries({ queryKey: ['/api/teachers'] });
       toast({
         title: "موفقیت",
-        description: "معلم با موفقیت حذف شد",
+        description: "استاد با موفقیت حذف شد",
       });
     },
     onError: (error: any) => {
       toast({
         title: "خطا",
-        description: error.message || "خطا در حذف معلم",
+        description: error.message || "خطا در حذف استاد",
         variant: "destructive",
       });
     },
@@ -111,7 +111,7 @@ export default function Teachers() {
   };
 
   const handleDelete = (teacherId: string) => {
-    if (window.confirm("آیا از حذف این معلم اطمینان دارید؟")) {
+    if (window.confirm("آیا از حذف این استاد اطمینان دارید؟")) {
       deleteTeacherMutation.mutate(teacherId);
     }
   };
@@ -132,7 +132,7 @@ export default function Teachers() {
         <div className="mr-64 p-6">
           <Card>
             <CardContent className="p-6">
-              <p className="text-red-600">خطا در بارگذاری اطلاعات معلم‌ها</p>
+              <p className="text-red-600">خطا در بارگذاری اطلاعات استادان</p>
             </CardContent>
           </Card>
         </div>
@@ -147,11 +147,11 @@ export default function Teachers() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight" data-testid="heading-teachers">
-            مدیریت معلم‌ها
+            مدیریت استادان
           </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            مدیریت اطلاعات معلم‌ها و هیئت علمی
-          </p>
+          {/* <p className="text-slate-600 dark:text-slate-400">
+            مدیریت اطلاعات استادان و هیئت علمی
+          </p> */}
         </div>
         <Button 
           onClick={() => {
@@ -161,15 +161,15 @@ export default function Teachers() {
           data-testid="button-add-teacher"
         >
           <Plus className="h-4 w-4 mr-2" />
-          افزودن معلم جدید
+          افزودن استاد جدید
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>لیست معلم‌ها</CardTitle>
+          <CardTitle>لیست استادان</CardTitle>
           <CardDescription>
-            مجموع {filteredTeachers.length} معلم
+            مجموع {filteredTeachers.length} استاد
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -199,7 +199,7 @@ export default function Teachers() {
             />
           ) : (
             <div className="text-center py-8 text-slate-500">
-              {searchTerm ? "هیچ معلمی با این مشخصات یافت نشد" : "هنوز معلمی اضافه نشده است"}
+              {searchTerm ? "هیچ استادی با این مشخصات یافت نشد" : "هنوز استادی اضافه نشده است"}
             </div>
           )}
         </CardContent>
@@ -212,7 +212,7 @@ export default function Teachers() {
           setEditingTeacher(null);
         }}
         onSubmit={handleSubmit}
-        title={editingTeacher ? "ویرایش معلم" : "افزودن معلم جدید"}
+        title={editingTeacher ? "ویرایش معلومات استاد" : "افزودن استاد جدید"}
         defaultValues={editingTeacher || undefined}
         isSubmitting={createTeacherMutation.isPending || updateTeacherMutation.isPending}
       />

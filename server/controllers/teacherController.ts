@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 const createTeacherSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  lostname: z.string().min(1, "lostname is required"),
   fatherName: z.string().min(1, "Father name is required"),
   grandfatherName: z.string().min(1, "Grandfather name is required"),
   academicRank: z.string().min(1, "Academic rank is required"),

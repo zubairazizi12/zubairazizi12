@@ -57,14 +57,14 @@ export default function Residents() {
       <header className="bg-white shadow-sm border-b border-slate-200 -m-6 mb-6">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-slate-900">مدیریت رزیدنت‌ها</h1>
+            <h1 className="text-2xl font-semibold text-slate-900">مدیریت ترینری</h1>
             {user?.role === 'admin' && (
               <Button 
                 className="bg-hospital-green-600 hover:bg-hospital-green-700"
                 data-testid="button-add-resident"
               >
                 <Plus className="h-4 w-4 ml-2" />
-                افزودن رزیدنت جدید
+                افزودن ترینری جدید
               </Button>
             )}
           </div>
@@ -79,14 +79,14 @@ export default function Residents() {
               <Search className="h-4 w-4 absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
               <Input
                 type="text"
-                placeholder="جستجو رزیدنت‌ها..."
+                placeholder="جستجو ترینری..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pr-10 w-64"
                 data-testid="input-search-residents"
               />
             </div>
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <Select  value={departmentFilter} onValueChange={setDepartmentFilter}>
               <SelectTrigger className="w-48" data-testid="select-department-filter">
                 <SelectValue placeholder="همه بخش‌ها" />
               </SelectTrigger>
@@ -98,7 +98,7 @@ export default function Residents() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <span className="text-sm text-slate-600">نمایش:</span>
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
@@ -116,7 +116,7 @@ export default function Residents() {
             >
               <List className="h-4 w-4" />
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -132,7 +132,7 @@ export default function Residents() {
         ))}
         {filteredResidents.length === 0 && (
           <div className="text-center py-12 text-slate-500">
-            <p>هیچ رزیدنتی با این مشخصات یافت نشد.</p>
+            <p>هیچ ترینری با این مشخصات یافت نشد.</p>
           </div>
         )}
       </div>
