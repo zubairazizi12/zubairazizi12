@@ -55,6 +55,8 @@ export default function TeacherFormDialog({
   });
 
   const handleSubmit = (data: InsertTeacher) => {
+    console.log('Form submission data:', data);
+    console.log('Form errors:', form.formState.errors);
     onSubmit(data);
   };
 
@@ -90,10 +92,10 @@ export default function TeacherFormDialog({
                   id="lostname"
                   {...form.register("lostname")}
                   placeholder="تخلص را وارد کنید"
-                  data-testid="input-teacher-name"
+                  data-testid="input-teacher-lostname"
                 />
-                {form.formState.errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>
+                {form.formState.errors.lostname && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.lostname.message}</p>
                 )}
               </div>
               
@@ -374,6 +376,31 @@ export default function TeacherFormDialog({
 
 
               <div>
+                <Label htmlFor="department">ریاست</Label>
+                <Input
+                  id="department"
+                  {...form.register("department")}
+                  placeholder="نام ریاست را وارد کنید"
+                />
+                {form.formState.errors.department && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.department.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="experience">سابقه کار (سال)</Label>
+                <Input
+                  id="experience"
+                  type="number"
+                  {...form.register("experience", { valueAsNumber: true })}
+                  placeholder="سابقه کار را وارد کنید"
+                />
+                {form.formState.errors.experience && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.experience.message}</p>
+                )}
+              </div>
+
+              <div>
               <Label htmlFor="status">وضعیت فعلی</Label>
               <Select onValueChange={(value) => form.setValue("status", value)}>
                 <SelectTrigger>
@@ -399,9 +426,14 @@ export default function TeacherFormDialog({
             </Button>
             <Button
               type="submit"
-              // disabled={isSubmitting}
+              disabled={isSubmitting}
               className="bg-hospital-green-600 hover:bg-hospital-green-700"
               data-testid="button-submit-teacher-form"
+              onClick={() => {
+                console.log('Submit button clicked');
+                console.log('Form valid:', form.formState.isValid);
+                console.log('Form errors:', form.formState.errors);
+              }}
             >
               {isSubmitting ? 'در حال ذخیره...' : 'ذخیره'}
             </Button>
