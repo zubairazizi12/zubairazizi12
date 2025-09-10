@@ -60,7 +60,6 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   private demoUsers: Map<string, User> = new Map();
   private demoResidents: Map<string, Resident> = new Map();
-  private demoFaculty: Map<string, Faculty> = new Map();
   private demoTeachers: Map<string, Teacher> = new Map();
   private demoForms: Map<string, Form> = new Map();
   private demoDisciplinaryActions: Map<string, DisciplinaryAction> = new Map();
@@ -77,8 +76,7 @@ export class DatabaseStorage implements IStorage {
       await connectDB();
       this.isMongoConnected = true;
       
-      // Seed database with comprehensive faculty and resident data
-      await seedDatabase();
+      // MongoDB connected successfully
       
     } catch (error) {
       console.warn('MongoDB initialization failed, using in-memory storage:', (error as Error).message);
@@ -223,73 +221,9 @@ export class DatabaseStorage implements IStorage {
     this.demoResidents.delete(id);
   }
 
-  // Faculty operations
-  async getAllFaculty(): Promise<Faculty[]> {
-    if (this.isMongoConnected) {
-      try {
-        const faculty = await FacultyModel.find({ status: 'active' })
-          .sort({ department: 1, name: 1 });
-        return faculty;
-      } catch (error) {
-        console.error('Error fetching faculty from MongoDB:', (error as Error).message);
-      }
-    }
-    return Array.from(this.demoFaculty.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }
-
-  async getFaculty(id: string): Promise<Faculty | undefined> {
-    if (this.isMongoConnected) {
-      try {
-        const faculty = await FacultyModel.findById(id);
-        return faculty || undefined;
-      } catch (error) {
-        console.error('Error fetching faculty from MongoDB:', (error as Error).message);
-      }
-    }
-    return this.demoFaculty.get(id);
-  }
-
-  async createFaculty(facultyData: InsertFaculty): Promise<Faculty> {
-    if (this.isMongoConnected) {
-      try {
-        const faculty = await FacultyModel.create(facultyData);
-        return faculty;
-      } catch (error) {
-        console.error('Error creating faculty in MongoDB:', (error as Error).message);
-      }
-    }
-    
-    const id = `faculty_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const newFaculty: Faculty = {
-      _id: id,
-      ...facultyData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    } as Faculty;
-    
-    this.demoFaculty.set(id, newFaculty);
-    return newFaculty;
-  }
-
-  async updateFaculty(id: string, facultyData: Partial<InsertFaculty>): Promise<Faculty> {
-    const existing = this.demoFaculty.get(id);
-    if (!existing) {
-      throw new Error('Faculty not found');
-    }
-    
-    const updated = { ...existing, ...facultyData, updatedAt: new Date() } as Faculty;
-    this.demoFaculty.set(id, updated);
-    return updated;
-  }
-
-  async deleteFaculty(id: string): Promise<void> {
-    this.demoFaculty.delete(id);
-  }
 
   // Teacher operations
-  async getTeachers(): Promise<Teacher[]> {
+  async getAllTeachers(): Promise<Teacher[]> {
     if (this.isMongoConnected) {
       try {
         const teachers = await TeacherModel.find({ status: 'active' })
@@ -365,18 +299,16 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async deleteTeacher(id: string): Promise<boolean> {
+  async deleteTeacher(id: string): Promise<void> {
     if (this.isMongoConnected) {
       try {
         const result = await TeacherModel.findByIdAndDelete(id);
-        return result !== null;
       } catch (error) {
         console.error('Error deleting teacher from MongoDB:', (error as Error).message);
-        return false;
       }
     }
     
-    return this.demoTeachers.delete(id);
+    this.demoTeachers.delete(id);
   }
 
   // Form operations
