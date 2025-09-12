@@ -13,7 +13,7 @@ const Header: React.FC = () => {
 
       {/* عنوان سیستم */}
       <h1 className="text-xl font-bold tracking-wide">
-        سیستم مدیریت گدام پوهنتون
+        سیستم مدیریتی ترینری شفاخانه چشم نور
       </h1>
     </header>
   );
