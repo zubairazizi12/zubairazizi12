@@ -121,17 +121,17 @@ export default function Residents() {
       </div>
 
       {/* Residents List */}
-      <div className="grid gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredResidents.map((resident) => (
           <ResidentCard
-            key={resident.id}
+            key={resident._id}
             resident={resident}
-            onClick={() => setSelectedResident(resident.id)}
-            data-testid={`card-resident-${resident.id}`}
+            onClick={() => setSelectedResident(resident._id)}
+            data-testid={`card-resident-${resident._id}`}
           />
         ))}
         {filteredResidents.length === 0 && (
-          <div className="text-center py-12 text-slate-500">
+          <div className="text-center py-12 text-slate-500 col-span-full">
             <p>هیچ ترینری با این مشخصات یافت نشد.</p>
           </div>
         )}

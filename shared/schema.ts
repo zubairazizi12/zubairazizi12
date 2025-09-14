@@ -164,9 +164,9 @@ export type Form = {
   formData: Record<string, any>;
   supervisorId?: string;
   status: string;
-  completedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  completedAt?:string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type DisciplinaryAction = {
