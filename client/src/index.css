@@ -1,3 +1,6 @@
+/* Dari/Farsi Font Support */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,9 +13,6 @@ html[dir="rtl"] * {
 html[dir="rtl"] .ltr {
   direction: ltr;
 }
-
-/* Dari/Farsi Font Support */
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 :root {
   --background: hsl(0 0% 100%);

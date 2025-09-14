@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Sidebar from "@/components/layout/sidebar";
+import Header from "@/components/layout/header";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -35,6 +36,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <Header />
       <Sidebar />
       <div className="ml-64">
         {/* Content rendered by individual pages */}

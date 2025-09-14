@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,41 +28,108 @@ export default function TeacherFormDialog({
   const form = useForm<InsertTeacher>({
     resolver: zodResolver(insertTeacherSchema),
     defaultValues: {
-      name: defaultValues?.name || "",
-      fatherName: defaultValues?.fatherName || "",
-      grandfatherName: defaultValues?.grandfatherName || "",
-      academicRank: defaultValues?.academicRank || "",
-      rankAchievementDate: defaultValues?.rankAchievementDate || new Date(),
-      trainerAppointmentDate: defaultValues?.trainerAppointmentDate || new Date(),
-      gender: defaultValues?.gender || "",
-      province: defaultValues?.province || "",
-      subject: defaultValues?.subject || "",
-      position: defaultValues?.position || "",
-      hospital: defaultValues?.hospital || "",
-      dateOfBirth: defaultValues?.dateOfBirth || new Date(),
-      idNumber: defaultValues?.idNumber || "",
-      dutyStartDate: defaultValues?.dutyStartDate || new Date(),
-      contactInfo: defaultValues?.contactInfo || "",
-      whatsappNumber: defaultValues?.whatsappNumber || "",
-      emailAddress: defaultValues?.emailAddress || "",
-      postCode: defaultValues?.postCode || "",
-      appointmentType: defaultValues?.appointmentType || "",
-      department: defaultValues?.department || "",
-      experience: defaultValues?.experience || 0,
-      status: defaultValues?.status || "active",
-      profileImageUrl: defaultValues?.profileImageUrl || "",
+      name: "",
+      lostname: "",
+      fatherName: "",
+      grandfatherName: "",
+      academicRank: "",
+      rankAchievementDate: new Date(),
+      trainerAppointmentDate: new Date(),
+      gender: "",
+      province: "",
+      subject: "",
+      position: "",
+      hospital: "",
+      dateOfBirth: new Date(),
+      idNumber: "",
+      dutyStartDate: new Date(),
+      contactInfo: "",
+      whatsappNumber: "",
+      emailAddress: "",
+      postCode: "",
+      appointmentType: "",
+      department: "",
+      experience: 0,
+      status: "active",
+      profileImageUrl: "",
     },
   });
 
+  // Reset form when dialog opens or defaultValues change
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultValues) {
+        // Editing mode - populate with existing values
+        form.reset({
+          name: defaultValues.name || "",
+          lostname: defaultValues.lostname || "",
+          fatherName: defaultValues.fatherName || "",
+          grandfatherName: defaultValues.grandfatherName || "",
+          academicRank: defaultValues.academicRank || "",
+          rankAchievementDate: defaultValues.rankAchievementDate || new Date(),
+          trainerAppointmentDate: defaultValues.trainerAppointmentDate || new Date(),
+          gender: defaultValues.gender || "",
+          province: defaultValues.province || "",
+          subject: defaultValues.subject || "",
+          position: defaultValues.position || "",
+          hospital: defaultValues.hospital || "",
+          dateOfBirth: defaultValues.dateOfBirth || new Date(),
+          idNumber: defaultValues.idNumber || "",
+          dutyStartDate: defaultValues.dutyStartDate || new Date(),
+          contactInfo: defaultValues.contactInfo || "",
+          whatsappNumber: defaultValues.whatsappNumber || "",
+          emailAddress: defaultValues.emailAddress || "",
+          postCode: defaultValues.postCode || "",
+          appointmentType: defaultValues.appointmentType || "",
+          department: defaultValues.department || "",
+          experience: defaultValues.experience || 0,
+          status: defaultValues.status || "active",
+          profileImageUrl: defaultValues.profileImageUrl || "",
+        });
+      } else {
+        // Add mode - reset to empty values
+        form.reset({
+          name: "",
+          lostname: "",
+          fatherName: "",
+          grandfatherName: "",
+          academicRank: "",
+          rankAchievementDate: new Date(),
+          trainerAppointmentDate: new Date(),
+          gender: "",
+          province: "",
+          subject: "",
+          position: "",
+          hospital: "",
+          dateOfBirth: new Date(),
+          idNumber: "",
+          dutyStartDate: new Date(),
+          contactInfo: "",
+          whatsappNumber: "",
+          emailAddress: "",
+          postCode: "",
+          appointmentType: "",
+          department: "",
+          experience: 0,
+          status: "active",
+          profileImageUrl: "",
+        });
+      }
+    }
+  }, [isOpen, defaultValues, form]);
+
   const handleSubmit = (data: InsertTeacher) => {
+    console.log('Form submission data:', data);
+    console.log('Form errors:', form.formState.errors);
     onSubmit(data);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent data-testid="dialog-teacher-form">
+      <DialogContent data-testid="dialog-teacher-form "
+        className="max-h-[90vh] overflow-y-auto max-w-4xl w-full">
         <DialogHeader>
-          <DialogTitle data-testid="text-teacher-form-title">{title}</DialogTitle>
+          <DialogTitle  data-testid="text-teacher-form-title">{title}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(handleSubmit)} className="mt-4">
@@ -71,16 +139,30 @@ export default function TeacherFormDialog({
               <div>
                 <Label htmlFor="name">نام</Label>
                 <Input
+                className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+
                   id="name"
                   {...form.register("name")}
-                  placeholder="نام کامل را وارد کنید"
+                  placeholder="نام را وارد کنید"
                   data-testid="input-teacher-name"
                 />
                 {form.formState.errors.name && (
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</p>
                 )}
               </div>
-
+                <div>
+                <Label htmlFor="lostname">تخلص</Label>
+                <Input
+                  id="lostname"
+                  {...form.register("lostname")}
+                  placeholder="تخلص را وارد کنید"
+                  data-testid="input-teacher-lostname"
+                />
+                {form.formState.errors.lostname && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.lostname.message}</p>
+                )}
+              </div>
+              
               <div>
                 <Label htmlFor="fatherName">نام پدر</Label>
                 <Input
@@ -94,7 +176,7 @@ export default function TeacherFormDialog({
               </div>
 
               <div>
-                <Label htmlFor="grandfatherName">نام پدر کلان</Label>
+                <Label htmlFor="grandfatherName">ولدیت</Label>
                 <Input
                   id="grandfatherName"
                   {...form.register("grandfatherName")}
@@ -143,7 +225,7 @@ export default function TeacherFormDialog({
 
               <div>
                 <Label htmlFor="gender">جنسیت</Label>
-                <Select onValueChange={(value) => form.setValue("gender", value)}>
+                <Select value={form.watch("gender")} onValueChange={(value) => form.setValue("gender", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="جنسیت را انتخاب کنید" />
                   </SelectTrigger>
@@ -158,16 +240,56 @@ export default function TeacherFormDialog({
               </div>
 
               <div>
-                <Label htmlFor="province">والایت</Label>
-                <Input
-                  id="province"
-                  {...form.register("province")}
-                  placeholder="والایت را وارد کنید"
-                />
-                {form.formState.errors.province && (
-                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.province.message}</p>
-                )}
-              </div>
+  <Label htmlFor="province">ولایت</Label>
+  <select
+    id="province"
+    {...form.register("province", { required: "لطفا یک ولایت انتخاب کنید" })}
+    className="w-full border rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-100"
+  >
+    <option value="">یک ولایت انتخاب کنید</option>
+    <option value="Badakhshan">بدخشان</option>
+    <option value="Badghis">بادغیس</option>
+    <option value="Baghlan">بغلان</option>
+    <option value="Balkh">بلخ</option>
+    <option value="Bamyan">بامیان</option>
+    <option value="Daykundi">دایکندی</option>
+    <option value="Farah">فراه</option>
+    <option value="Faryab">فاریاب</option>
+    <option value="Ghazni">غزنی</option>
+    <option value="Ghor">غور</option>
+    <option value="Helmand">هلمند</option>
+    <option value="Herat">هرات</option>
+    <option value="Jowzjan">جوزجان</option>
+    <option value="Kabul">کابل</option>
+    <option value="Kandahar">کندهار</option>
+    <option value="Kapisa">کاپیسا</option>
+    <option value="Khost">خوست</option>
+    <option value="Kunar">کنر</option>
+    <option value="Kunduz">کندز</option>
+    <option value="Laghman">لغمان</option>
+    <option value="Logar">لوگر</option>
+    <option value="Nangarhar">ننگرهار</option>
+    <option value="Nimroz">نیمروز</option>
+    <option value="Nuristan">نورستان</option>
+    <option value="Paktia">پکتیا</option>
+    <option value="Paktika">پکتیکا</option>
+    <option value="Panjshir">پنجشیر</option>
+    <option value="Parwan">پروان</option>
+    <option value="Samangan">سمنگان</option>
+    <option value="Sar-e Pol">سرپل</option>
+    <option value="Takhar">تخار</option>
+    <option value="Urozgan">ارزگان</option>
+    <option value="Wardak">میدان وردک</option>
+    <option value="Zabul">زابل</option>
+  </select>
+
+  {form.formState.errors.province && (
+    <p className="text-red-500 text-sm mt-1">
+      {form.formState.errors.province.message}
+    </p>
+  )}
+</div>
+
 
               <div>
                 <Label htmlFor="subject">رشته</Label>
@@ -187,7 +309,7 @@ export default function TeacherFormDialog({
                 <Input
                   id="position"
                   {...form.register("position")}
-                  placeholder="وظیفه را وارد کنید"
+                   placeholder="وظیفه را وارد کنید"
                 />
                 {form.formState.errors.position && (
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.position.message}</p>
@@ -296,66 +418,72 @@ export default function TeacherFormDialog({
               </div>
 
               <div>
-                <Label htmlFor="appointmentType">نوع تقرری</Label>
-                <Input
-                  id="appointmentType"
-                  {...form.register("appointmentType")}
-                  placeholder="نوع تقرری را وارد کنید"
-                />
-                {form.formState.errors.appointmentType && (
-                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.appointmentType.message}</p>
-                )}
-              </div>
+                
+  <Label htmlFor="appointmentType">نوع تقرری</Label>
+  <select
+    id="appointmentType"
+    {...form.register("appointmentType", { required: "لطفاً نوع تقرری را انتخاب کنید" })}
+    className="w-full border rounded-md p-2 mt-1 bg-gray-100"
+  >
+    <option value="">نوع تقرری را انتخاب کنید</option>
+    <option value="رقابت آزاد">رقابت آزاد</option>
+    <option value="سرپرست">سرپرست</option>
+    <option value="حکمی">حکمی</option>
+  </select>
+
+  {form.formState.errors.appointmentType && (
+    <p className="text-red-500 text-sm mt-1 ">
+      {form.formState.errors.appointmentType.message}
+    </p>
+  )}
+</div>
+
 
               <div>
-                <Label htmlFor="department">بخش</Label>
+                <Label htmlFor="department">ریاست</Label>
                 <Input
                   id="department"
                   {...form.register("department")}
-                  placeholder="بخش مربوطه را وارد کنید"
-                  data-testid="input-teacher-department"
+                  placeholder="نام ریاست را وارد کنید"
                 />
                 {form.formState.errors.department && (
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.department.message}</p>
                 )}
               </div>
-            </div>
-          </div>
 
-          {/* Additional fields that span both columns */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div>
-              <Label htmlFor="experience">سال‌های تجربه</Label>
-              <Input
-                id="experience"
-                type="number"
-                {...form.register("experience", { valueAsNumber: true })}
-                placeholder="تعداد سال‌های تجربه"
-                data-testid="input-teacher-experience"
-              />
-              {form.formState.errors.experience && (
-                <p className="text-red-500 text-sm mt-1">{form.formState.errors.experience.message}</p>
-              )}
-            </div>
+              <div>
+                <Label htmlFor="experience">سابقه کار (سال)</Label>
+                <Input
+                  id="experience"
+                  type="number"
+                  {...form.register("experience", { valueAsNumber: true })}
+                  placeholder="سابقه کار را وارد کنید"
+                />
+                {form.formState.errors.experience && (
+                  <p className="text-red-500 text-sm mt-1">{form.formState.errors.experience.message}</p>
+                )}
+              </div>
 
-            <div>
+              <div>
               <Label htmlFor="status">وضعیت فعلی</Label>
-              <Select onValueChange={(value) => form.setValue("status", value)}>
+              <Select value={form.watch("status")} onValueChange={(value) => form.setValue("status", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="وضعیت فعلی را انتخاب کنید" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">فعال</SelectItem>
-                  <SelectItem value="inactive">غیر فعال</SelectItem>
-                  <SelectItem value="suspended">تعلیق</SelectItem>
+                  <SelectItem value="active">برحال</SelectItem>
+                  <SelectItem value="inactive">منفک</SelectItem>
+                  
                 </SelectContent>
               </Select>
               {form.formState.errors.status && (
                 <p className="text-red-500 text-sm mt-1">{form.formState.errors.status.message}</p>
               )}
             </div>
+            </div>
           </div>
 
+    
           <div className="flex items-center justify-end pt-4 border-t border-slate-200 mt-6 space-x-3 rtl:space-x-reverse">
             <Button variant="outline" type="button" onClick={onClose} data-testid="button-cancel-teacher-form">
               لغو
@@ -365,6 +493,11 @@ export default function TeacherFormDialog({
               disabled={isSubmitting}
               className="bg-hospital-green-600 hover:bg-hospital-green-700"
               data-testid="button-submit-teacher-form"
+              onClick={() => {
+                console.log('Submit button clicked');
+                console.log('Form valid:', form.formState.isValid);
+                console.log('Form errors:', form.formState.errors);
+              }}
             >
               {isSubmitting ? 'در حال ذخیره...' : 'ذخیره'}
             </Button>

@@ -1,15 +1,16 @@
 import { Request, Response } from 'express';
-import { TeacherModel, UserModel } from '../models';
+import { storage } from '../storage';
 import { z } from 'zod';
 
 const createTeacherSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  lostname: z.string().min(1, "Last name is required"),
   fatherName: z.string().min(1, "Father name is required"),
   grandfatherName: z.string().min(1, "Grandfather name is required"),
   academicRank: z.string().min(1, "Academic rank is required"),
   rankAchievementDate: z.string().transform((str) => new Date(str)),
   trainerAppointmentDate: z.string().transform((str) => new Date(str)),
-  gender: z.enum(["Male", "Female"]),
+  gender: z.string().min(1, "Gender is required"),
   province: z.string().min(1, "Province is required"),
   subject: z.string().min(1, "Subject is required"),
   position: z.string().min(1, "Position is required"),
@@ -31,7 +32,7 @@ const createTeacherSchema = z.object({
 export class TeacherController {
   static async getAllTeachers(req: Request, res: Response) {
     try {
-      const teachers = await TeacherModel.find().sort({ createdAt: -1 });
+      const teachers = await storage.getAllTeachers();
       res.json(teachers);
     } catch (error) {
       console.error('Error fetching teachers:', error);
@@ -41,7 +42,7 @@ export class TeacherController {
 
   static async getTeacherById(req: Request, res: Response) {
     try {
-      const teacher = await TeacherModel.findById(req.params.id);
+      const teacher = await storage.getTeacher(req.params.id);
       if (!teacher) {
         return res.status(404).json({ message: 'Teacher not found' });
       }
@@ -54,14 +55,13 @@ export class TeacherController {
 
   static async createTeacher(req: any, res: Response) {
     try {
-      const user = await UserModel.findById(req.user.claims.sub);
+      const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
       const validatedData = createTeacherSchema.parse(req.body);
-      const teacher = new TeacherModel(validatedData);
-      const savedTeacher = await teacher.save();
+      const savedTeacher = await storage.createTeacher(validatedData);
       
       console.log('Teacher saved successfully:', savedTeacher._id);
       res.status(201).json(savedTeacher);
@@ -80,21 +80,13 @@ export class TeacherController {
 
   static async updateTeacher(req: any, res: Response) {
     try {
-      const user = await UserModel.findById(req.user.claims.sub);
+      const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
       const validatedData = createTeacherSchema.partial().parse(req.body);
-      const teacher = await TeacherModel.findByIdAndUpdate(
-        req.params.id,
-        { ...validatedData, updatedAt: new Date() },
-        { new: true, runValidators: true }
-      );
-      
-      if (!teacher) {
-        return res.status(404).json({ message: "Teacher not found" });
-      }
+      const teacher = await storage.updateTeacher(req.params.id, validatedData);
       
       res.json(teacher);
     } catch (error) {
@@ -111,15 +103,12 @@ export class TeacherController {
 
   static async deleteTeacher(req: any, res: Response) {
     try {
-      const user = await UserModel.findById(req.user.claims.sub);
+      const user = await storage.getUser(req.user.claims.sub);
       if (user?.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      const teacher = await TeacherModel.findByIdAndDelete(req.params.id);
-      if (!teacher) {
-        return res.status(404).json({ message: "Teacher not found" });
-      }
+      await storage.deleteTeacher(req.params.id);
       res.json({ message: "Teacher deleted successfully" });
     } catch (error) {
       console.error("Error deleting teacher:", error);

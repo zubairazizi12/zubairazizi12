@@ -3,16 +3,16 @@ import { z } from "zod";
 // Demo User Credentials
 export const DEMO_CREDENTIALS = {
   admin: {
-    username: "admin@hospital.demo",
-    password: "AdminDemo123!",
+    username: "admin@com",
+    password: "admin123",
     id: "demo_admin_001",
     firstName: "Admin",
     lastName: "User",
     role: "admin"
   },
   viewer: {
-    username: "viewer@hospital.demo",
-    password: "ViewerDemo123!",
+    username: "viewer@com",
+    password: "Viewer123",
     id: "demo_viewer_001", 
     firstName: "Viewer",
     lastName: "User",
@@ -34,6 +34,7 @@ export const insertResidentSchema = z.object({
 
 export const insertTeacherSchema = z.object({
   name: z.string().min(1),
+  lostname: z.string().min(1),
   fatherName: z.string().min(1),
   grandfatherName: z.string().min(1),
   academicRank: z.string().min(1),
@@ -163,9 +164,9 @@ export type Form = {
   formData: Record<string, any>;
   supervisorId?: string;
   status: string;
-  completedAt?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  completedAt?:string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type DisciplinaryAction = {
