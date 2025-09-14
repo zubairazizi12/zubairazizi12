@@ -67,11 +67,32 @@ export default function TrainerRegistrationForm({
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    // Replace with API call
-    console.log("Submitted Trainer:", data);
-    alert("فرم با موفقیت ارسال شد - کنسول را چک کنید");
-    reset();
+  const onSubmit = async (data: FormValues) => {
+    try {
+      const response = await fetch("/api/trainers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response from server:", errorData);
+        alert("خطا در ثبت فرم: " + (errorData.message || "اطلاعات نادرست"));
+        return;
+      }
+
+      const savedTrainer = await response.json();
+      console.log("Trainer saved:", savedTrainer);
+      alert("فرم با موفقیت ثبت شد!");
+      reset();
+      onClose(); // فرم را بعد از ذخیره موفق ببند
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("خطا در ثبت فرم: لطفاً دوباره تلاش کنید.");
+    }
   };
 
   return (
