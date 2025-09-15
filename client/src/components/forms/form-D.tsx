@@ -26,6 +26,57 @@ export default function EvaluationFormD() {
   const [hospitalHead, setHospitalHead] = useState("");
 
   const inputClass = "border rounded px-2 py-2 w-full text-center";
+  //// ارسال به سمت بک اند//////
+  const handleSubmit = async () => {
+    const payload = {
+      year,
+      name,
+      fatherName,
+      department,
+      trainingYear,
+      conferenceTitle,
+      score,
+      date,
+      teacherName,
+      teacherSigned,
+      notes,
+      departmentHead,
+      programHead,
+      hospitalHead,
+    };
+
+    try {
+      const res = await fetch("http://localhost:5000/api/conference", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        alert("فرم با موفقیت ذخیره شد ✅");
+        // ریست فرم
+        setYear("");
+        setName("");
+        setFatherName("");
+        setDepartment("");
+        setTrainingYear("");
+        setConferenceTitle("");
+        setScore("");
+        setDate("");
+        setTeacherName("");
+        setTeacherSigned(false);
+        setNotes(false);
+        setDepartmentHead("");
+        setProgramHead("");
+        setHospitalHead("");
+      } else {
+        alert("❌ خطا در ذخیره فرم");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ مشکل در ارتباط با سرور");
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-2xl p-6 mt-6">
@@ -195,24 +246,7 @@ export default function EvaluationFormD() {
 
       <div className="text-center mt-6">
         <button
-          onClick={() =>
-            console.log({
-              year,
-              name,
-              fatherName,
-              department,
-              trainingYear,
-              conferenceTitle,
-              score,
-              date,
-              teacherName,
-              teacherSigned,
-              notes,
-              departmentHead,
-              programHead,
-              hospitalHead,
-            })
-          }
+          onClick={handleSubmit}
           className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
         >
           ذخیره فرم

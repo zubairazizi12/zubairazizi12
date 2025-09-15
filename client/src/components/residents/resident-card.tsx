@@ -1,93 +1,9 @@
-
-// import React from "react";
-// import type { Resident } from "@shared/schema";
-// import { FileText, Plus } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-
-// interface ResidentCardProps {
-//   resident: Resident;
-//   onClick?: () => void;
-//   onActionClick?: () => void;
-// }
-
-// export default function ResidentCard({
-//   resident,
-//   onClick,
-//   onActionClick,
-// }: ResidentCardProps) {
-//   const formsCompleted = 1;
-//   const formsTotal = 9;
-
-//   return (
-//     <div className="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden">
-//       {/* بدنه بالای کارت: عکس سمت چپ و نام سمت راست */}
-//       <div className="p-4 flex items-center gap-4">
-//         {/* عکس بزرگتر */}
-//         <div className="w-28 h-28 rounded-full overflow-hidden border border-slate-200 flex-shrink-0">
-//           <img
-//             src={resident.profileImageUrl ?? "/assets/img/default-avatar.png"}
-//             alt={resident.fullName}
-//             className="w-full h-full object-cover"
-//           />
-//         </div>
-//         {/* نام و بخش */}
-//         <div className="flex flex-col text-left">
-//           <h3 className="text-lg font-semibold text-slate-900">
-//             {resident.fullName}
-//           </h3>
-//             <button
-//     type="button"
-//     className="mt-1 inline-block text-xs text-white bg-hospital-green-600 px-3 py-1 rounded-full hover:bg-hospital-green-700 transition-colors"
-//   >
-//     {resident.department}
-//   </button>
-//         </div>
-//       </div>
-
-//       {/* بخش میانی: تعداد فرم‌ها و اضافه فرم */}
-//       <div className="px-4 pb-4 flex items-center justify-between">
-//         <div className="text-slate-600 text-xs px-2 py-1 rounded-full flex items-center gap-1 border border-slate-300 group-hover:bg-hospital-green-600 group-hover:text-white transition-colors">
-//           <FileText className="w-3 h-3" />
-//           {formsCompleted}/{formsTotal}
-//         </div>
-//         <Button
-//           size="sm"
-//           variant="outline"
-//           className="text-xs flex items-center gap-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
-//         >
-//           <Plus className="h-3 w-3" />
-//           اضافه فرم
-//         </Button>
-//       </div>
-
-//       {/* پایین کارت: دو دکمه کنارهم */}
-//       <div className="px-4 pb-4 flex gap-2">
-//         <Button
-//           variant="outline"
-//           className="flex-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
-//           onClick={onClick}
-//         >
-//           مشاهده جزئیات
-//         </Button>
-//         <Button
-//           variant="outline"
-//           className="flex-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
-//           onClick={onActionClick}
-//         >
-//           اکشن
-//         </Button>
-//       </div>
-//     </div>
-//   );
-// }
-/////////
 import React, { useState } from "react";
 import type { Resident, Form } from "@shared/schema";
-import { FileText, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FormModal from "@/components/forms/form-modal";
+import { Eye, MoreHorizontal, Plus, X } from "lucide-react";
 
-// لیست فرم‌ها
 const FORM_TYPES = [
   { type: "J", name: "Initial Assessment" },
   { type: "F", name: "Mid-Training Evaluation" },
@@ -105,10 +21,10 @@ interface ResidentCardProps {
   onClick?: () => void;
 }
 
-export default function ResidentCard({ resident, onClick }: ResidentCardProps) {
-  const formsCompleted = 1;
-  const formsTotal = FORM_TYPES.length;
-
+export default function ResidentCardList({
+  resident,
+  onClick,
+}: ResidentCardProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
 
@@ -125,101 +41,104 @@ export default function ResidentCard({ resident, onClick }: ResidentCardProps) {
   };
 
   return (
-    <div className="relative group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition overflow-visible">
-      {/* بخش بالای کارت */}
-      <div className="p-4 flex items-center gap-4">
-        <div className="w-28 h-28 rounded-full overflow-hidden border border-slate-200 flex-shrink-0">
+    
+    <div className="grid grid-cols-7 items-center bg-white border border-slate-200 rounded-lg shadow-sm hover:shadow-md transition p-3 gap-2">
+      
+      {/* ستون ۱: عکس */}
+      <div className="flex justify-center">
+        <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200">
           <img
             src={resident.profileImageUrl ?? "/assets/img/default-avatar.png"}
             alt={resident.fullName}
             className="w-full h-full object-cover"
           />
         </div>
-        <div className="flex flex-col text-left">
-          <h3 className="text-lg font-semibold text-slate-900">{resident.fullName}</h3>
-          <button
-            type="button"
-            className="mt-1 inline-block text-xs text-white bg-hospital-green-600 px-3 py-1 rounded-full hover:bg-hospital-green-700 transition-colors"
-          >
-            {resident.department}
-          </button>
-        </div>
       </div>
 
-      {/* بخش میانی */}
-      <div className="px-4 pb-4 flex items-center justify-between relative">
-        <div className="text-slate-600 text-xs px-2 py-1 rounded-full flex items-center gap-1 border border-slate-300 group-hover:bg-hospital-green-600 group-hover:text-white transition-colors">
-          <FileText className="w-3 h-3" />
-          {formsCompleted}/{formsTotal}
-        </div>
+      {/* ستون ۲: نام */}
+      <div className="text-slate-900 font-semibold">
+        {resident.fullName ?? resident.fullName}
+      </div>
 
-        {/* دکمه اضافه فرم و dropdown عمودی */}
-        <div className="relative">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs flex items-center gap-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
-            onClick={() => setShowDropdown((p) => !p)}
-          >
-            <Plus className="h-3 w-3" />
-            اضافه فرم
-          </Button>
+      {/* ستون ۳: تخلص */}
+      <div className="text-slate-900">{resident.fullName ?? ""}</div>
 
-          {showDropdown && (
-            <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg p-3 z-50 w-40">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-slate-700">انتخاب فرم</span>
-                <button
-                  onClick={() => setShowDropdown(false)}
-                  className="text-slate-500 hover:text-red-500"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
-                {FORM_TYPES.map((ft) => (
-                  <button
-                    key={ft.type}
-                    onClick={() => handleSelectForm(ft)}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 hover:bg-hospital-green-600 hover:text-white font-bold transition"
-                    title={ft.name} // نام فرم روی hover نمایش داده می‌شود
-                  >
-                    {ft.type}
-                  </button>
-                ))}
-              </div>
+      {/* ستون ۴: آیدی */}
+      <div className="text-slate-700 text-sm">{resident._id}</div>
+
+      {/* ستون ۵: دیپارتمنت */}
+      <div className="text-slate-500 text-sm">{resident.department}</div>
+
+      {/* ستون ۶: اضافه کردن فرم */}
+      <div className="relative">
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-xs flex items-center gap-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
+          onClick={() => setShowDropdown((p) => !p)}
+        >
+          <Plus className="h-3 w-3" />
+          اضافه فرم
+        </Button>
+
+        {showDropdown && (
+          <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg p-3 z-50 w-40">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-semibold text-slate-700">
+                انتخاب فرم
+              </span>
+              <button
+                onClick={() => setShowDropdown(false)}
+                className="text-slate-500 hover:text-red-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-          )}
-        </div>
+            <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
+              {FORM_TYPES.map((ft) => (
+                <button
+                  key={ft.type}
+                  onClick={() => handleSelectForm(ft)}
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 hover:bg-hospital-green-600 hover:text-white font-bold transition"
+                  title={ft.name}
+                >
+                  {ft.type}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* پایین کارت */}
-      <div className="px-4 pb-4 flex gap-2">
+       {/* ستون ۶: جزئیات */}
+      <div className="flex justify-center">
         <Button
+          size="icon"
           variant="outline"
-          className="flex-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
+          className="border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
           onClick={onClick}
+          title="جزئیات"
         >
-          مشاهده جزئیات
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-1 border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
-        >
-          اکشن
+          <Eye className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Modal واقعی فقط با FormModal */}
+      {/* ستون ۷: اکشن */}
+      <div className="flex justify-center">
+        <Button
+          size="icon"
+          variant="outline"
+          className="border-slate-300 hover:bg-hospital-green-600 hover:text-white transition-colors"
+          title="اکشن"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Modal فرم */}
       {selectedForm && (
-        <FormModal
-          form={selectedForm}
-          onClose={() => setSelectedForm(null)}
-        />
+        <FormModal form={selectedForm} onClose={() => setSelectedForm(null)} />
       )}
     </div>
   );
 }
-
-
-
