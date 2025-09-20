@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 export default function EvaluationFormE() {
-  const [year, setYear] = useState("");           // فیلد سال
+  const [year, setYear] = useState("");
   const [name, setName] = useState("");
   const [fatherName, setFatherName] = useState("");
   const [trainingYear, setTrainingYear] = useState("");
@@ -18,12 +18,63 @@ export default function EvaluationFormE() {
 
   const inputClass = "border rounded px-2 py-2 w-full text-center";
 
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/evaluationFormE", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          year,
+          name,
+          fatherName,
+          trainingYear,
+          incidentTitle,
+          date,
+          score,
+          teacherName,
+          teacherSigned,
+          notes,
+          averageScore,
+          departmentHead,
+          programHead,
+          hospitalHead,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("خطا در ذخیره فرم");
+      }
+
+      const data = await res.json();
+      console.log("فرم ذخیره شد:", data);
+
+      // اینجا می‌توانید فرم را ریست کنید یا پیام موفقیت بدهید
+      alert("فرم با موفقیت ذخیره شد!");
+      setYear("");
+    setName("");
+    setFatherName("");
+    setTrainingYear("");
+    setIncidentTitle("");
+    setDate("");
+    setScore("");
+    setTeacherName("");
+    setTeacherSigned(false);
+    setNotes(false);
+    setAverageScore("");
+    setDepartmentHead("");
+    setProgramHead("");
+    setHospitalHead("");
+    } catch (err) {
+      console.error(err);
+      alert("خطا در ذخیره فرم");
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-2xl p-6 mt-6">
       <h2 className="text-xl font-bold text-center mb-4">
         فرم ارزشیابی سالانه دستیار
       </h2>
-
       {/* فیلد سال */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div>
@@ -189,27 +240,9 @@ export default function EvaluationFormE() {
           />
         </div>
       </div>
-
       <div className="text-center mt-6">
         <button
-          onClick={() =>
-            console.log({
-              year,
-              name,
-              fatherName,
-              trainingYear,
-              incidentTitle,
-              date,
-              score,
-              teacherName,
-              teacherSigned,
-              notes,
-              averageScore,
-              departmentHead,
-              programHead,
-              hospitalHead,
-            })
-          }
+          onClick={handleSubmit}
           className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
         >
           ذخیره فرم

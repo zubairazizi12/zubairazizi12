@@ -14,15 +14,6 @@ export default function EvaluationFormG() {
   const [finalWritten, setFinalWritten] = useState("");
   const [finalPractical, setFinalPractical] = useState("");
 
-  // محاسبهٔ مجموع
-  const total =
-    (Number(exam1Written) || 0) +
-    (Number(exam1Practical) || 0) +
-    (Number(exam2Written) || 0) +
-    (Number(exam2Practical) || 0) +
-    (Number(finalWritten) || 0) +
-    (Number(finalPractical) || 0);
-
   const [average, setAverage] = useState("");
   const [teacherName, setTeacherName] = useState("");
   const [teacherSigned, setTeacherSigned] = useState(false);
@@ -31,6 +22,73 @@ export default function EvaluationFormG() {
   const [hospitalHead, setHospitalHead] = useState("");
 
   const inputClass = "border rounded px-2 py-2 w-full text-center";
+
+  // محاسبه مجموع
+  const total =
+    (Number(exam1Written) || 0) +
+    (Number(exam1Practical) || 0) +
+    (Number(exam2Written) || 0) +
+    (Number(exam2Practical) || 0) +
+    (Number(finalWritten) || 0) +
+    (Number(finalPractical) || 0);
+
+  // تابع ثبت فرم
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/evaluationFormG", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          year,
+          name,
+          fatherName,
+          trainingYear,
+          department,
+          exam1Written: Number(exam1Written),
+          exam1Practical: Number(exam1Practical),
+          exam2Written: Number(exam2Written),
+          exam2Practical: Number(exam2Practical),
+          finalWritten: Number(finalWritten),
+          finalPractical: Number(finalPractical),
+          total,
+          average,
+          teacherName,
+          teacherSigned,
+          departmentHead,
+          programHead,
+          hospitalHead,
+        }),
+      });
+
+      if (!res.ok) throw new Error("خطا در ذخیره فرم");
+
+      const data = await res.json();
+      console.log("فرم ذخیره شد:", data);
+      alert("فرم با موفقیت ذخیره شد!");
+
+      // ریست کردن تمام فیلدها
+      setYear("");
+      setName("");
+      setFatherName("");
+      setTrainingYear("");
+      setDepartment("");
+      setExam1Written("");
+      setExam1Practical("");
+      setExam2Written("");
+      setExam2Practical("");
+      setFinalWritten("");
+      setFinalPractical("");
+      setAverage("");
+      setTeacherName("");
+      setTeacherSigned(false);
+      setDepartmentHead("");
+      setProgramHead("");
+      setHospitalHead("");
+    } catch (err) {
+      console.error(err);
+      alert("خطا در ذخیره فرم");
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-2xl p-6 mt-6">
@@ -240,31 +298,10 @@ export default function EvaluationFormG() {
           />
         </div>
       </div>
-
+      {/* دکمه ثبت */}
       <div className="text-center mt-6">
         <button
-          onClick={() =>
-            console.log({
-              year,
-              name,
-              fatherName,
-              trainingYear,
-              department,
-              exam1Written,
-              exam1Practical,
-              exam2Written,
-              exam2Practical,
-              finalWritten,
-              finalPractical,
-              total,
-              average,
-              teacherName,
-              teacherSigned,
-              departmentHead,
-              programHead,
-              hospitalHead,
-            })
-          }
+          onClick={handleSubmit}
           className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
         >
           ذخیره فرم

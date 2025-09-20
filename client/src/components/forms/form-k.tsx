@@ -54,12 +54,140 @@ export default function MonographEvaluationForm() {
     setEvaluations(updated);
   };
 
+  // const handleSubmit = async () => {
+  //   try {
+  //     const res = await fetch("http://localhost:5000//api/monographEvaluation", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         studentId: "665dfb4c1d53c33f74123456", // 👈
+  //         name,
+  //         lastName,
+  //         fatherName,
+  //         idNumber,
+  //         field,
+  //         trainingYear,
+  //         startYear,
+  //         date,
+  //         evaluations,
+  //       }),
+        
+  //     });
+  //     if (!res.ok) throw new Error("خطا در ذخیره فرم");
+  //     const data = await res.json();
+  //     console.log("فرم ذخیره شد:", data);
+  //     alert("فرم با موفقیت ذخیره شد!");
+
+  //     // ریست کردن همه فیلدها
+  //     setName("");
+  //     setLastName("");
+  //     setFatherName("");
+  //     setIdNumber("");
+  //     setField("");
+  //     setTrainingYear("");
+  //     setStartYear("");
+  //     setDate("");
+  //     setEvaluations([
+  //       {
+  //         section: "",
+  //         writingStyle: "",
+  //         presentation: "",
+  //         answersToQuestions: "",
+  //         defense: "",
+  //         answersToAdditional: "",
+  //         percentage: "",
+  //         score: "",
+  //         teacherName: "",
+  //         teacherSigned: false,
+  //         characteristics: "",
+  //         total: "",
+  //         average: "",
+  //       },
+  //     ]);
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("خطا در ذخیره فرم");
+  //   }
+  // };
+  ///////////////////////////////
+const handleSubmit = async () => {
+  try {
+    const res = await fetch("http://localhost:5000/api/monographEvaluation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentId: "64dfe0123456789abcdef012", // آیدی واقعی یا حذفش اگر ندارید
+        name,
+        lastName,
+        fatherName,
+        idNumber,
+        field,
+        trainingYear,
+        startYear,
+        date,
+        evaluations,
+      }),
+    });
+
+    // فقط یک‌بار بدنه را بخوان
+    const text = await res.text();
+    console.log("RAW RESPONSE:", text);
+
+    if (!res.ok) {
+      console.error("server returned error:", text);
+      alert("خطا در ذخیره فرم — سرور پاسخ خطا داد. کنسول را بررسی کن.");
+      return;
+    }
+
+    // اگر content-type JSON است، parse کن
+    const contentType = res.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? JSON.parse(text)
+      : text;
+
+    console.log("فرم ذخیره شد:", data);
+    alert("فرم با موفقیت ذخیره شد!");
+
+    // ریست کردن همه فیلدها
+    setName("");
+    setLastName("");
+    setFatherName("");
+    setIdNumber("");
+    setField("");
+    setTrainingYear("");
+    setStartYear("");
+    setDate("");
+    setEvaluations([
+      {
+        section: "",
+        writingStyle: "",
+        presentation: "",
+        answersToQuestions: "",
+        defense: "",
+        answersToAdditional: "",
+        percentage: "",
+        score: "",
+        teacherName: "",
+        teacherSigned: false,
+        characteristics: "",
+        total: "",
+        average: "",
+      },
+    ]);
+  } catch (err) {
+    console.error("fetch error:", err);
+    alert("خطا در ذخیره فرم");
+  }
+};
+
   // استایل مشترک برای همه input ها
   const inputClass = "border rounded px-2 py-2 w-full text-center";
 
   return (
     <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-2xl p-6 mt-6">
-      <h2 className="text-xl font-bold text-center mb-4">فرم ارزیابی مونوگراف</h2>
+      <h2 className="text-xl font-bold text-center mb-4">
+        فرم ارزیابی مونوگراف
+      </h2>
 
       {/* اطلاعات فردی */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -252,9 +380,7 @@ export default function MonographEvaluationForm() {
               type="text"
               placeholder="مجموع نمرات"
               value={evalItem.total}
-              onChange={(e) =>
-                handleEvalChange(i, "total", e.target.value)
-              }
+              onChange={(e) => handleEvalChange(i, "total", e.target.value)}
               className={inputClass}
             />
           </div>
@@ -265,9 +391,7 @@ export default function MonographEvaluationForm() {
               type="text"
               placeholder="اوسط"
               value={evalItem.average}
-              onChange={(e) =>
-                handleEvalChange(i, "average", e.target.value)
-              }
+              onChange={(e) => handleEvalChange(i, "average", e.target.value)}
               className={inputClass}
             />
           </div>
@@ -276,19 +400,7 @@ export default function MonographEvaluationForm() {
 
       <div className="text-center">
         <button
-          onClick={() =>
-            console.log({
-              name,
-              lastName,
-              fatherName,
-              idNumber,
-              field,
-              trainingYear,
-              startYear,
-              date,
-              evaluations,
-            })
-          }
+          onClick={handleSubmit}
           className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
         >
           ذخیره فرم

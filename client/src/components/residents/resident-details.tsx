@@ -1,11 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import type { Resident } from "@shared/schema";
 
-// لیست فرم‌ها
 const FORM_TYPES = [
   { type: "J", name: "Initial Assessment" },
   { type: "F", name: "Mid-Training Evaluation" },
@@ -24,13 +21,12 @@ interface ResidentDetailsProps {
 }
 
 export default function ResidentDetails({ residentId, onClose }: ResidentDetailsProps) {
-  const { user } = useAuth();
-
-  const { data: resident } = useQuery<Resident>({
+  const { data: resident, isLoading } = useQuery<Resident>({
     queryKey: ["/api/residents", residentId],
   });
 
-  if (!resident) return null;
+  if (isLoading) return <div>در حال بارگذاری...</div>;
+  if (!resident) return <div>رزیدنت پیدا نشد.</div>;
 
   return (
     <div className="relative bg-white rounded-lg shadow-lg border border-slate-200 p-6">
@@ -44,9 +40,8 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
         <X className="h-4 w-4" />
       </Button>
 
-      {/* Top row: Photo + Form Buttons + Placeholder for Actions */}
+      {/* Top row: Photo + Form Buttons + Actions */}
       <div className="flex items-center justify-between mb-4 w-full">
-        {/* Left: Resident photo */}
         <div className="flex-shrink-0 w-24 h-24 rounded-full border border-slate-300 overflow-hidden">
           {resident.profileImageUrl ? (
             <img
@@ -61,20 +56,18 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
           )}
         </div>
 
-        {/* Center: Form Buttons */}
         <div className="flex-1 flex justify-center space-x-4 overflow-x-auto mx-4">
           {FORM_TYPES.map((ft) => (
             <Button
               key={ft.type}
               className="w-16 h-16 rounded-full flex items-center justify-center text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
-              title={ft.name} // نام فرم روی hover نشان داده می‌شود
+              title={ft.name}
             >
               {ft.type}
             </Button>
           ))}
         </div>
 
-        {/* Right: Placeholder for Actions */}
         <div className="flex-shrink-0">
           <Button
             size="sm"
@@ -88,20 +81,20 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
       {/* Resident Information */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-200 pt-4 mt-4">
         <div>
-          <h4 className="font-medium text-slate-900 mb-2">Personal Information</h4>
+          <h4 className="font-medium text-slate-900 mb-2">اطلاعات شخصی</h4>
           <ul className="text-sm text-slate-700 space-y-1">
-            <li><strong>Full Name:</strong> {resident.fullName}</li>
-            <li><strong>Age:</strong> {resident.age}</li>
-            <li><strong>Gender:</strong> {resident.gender}</li>
+            <li><strong>نام کامل:</strong> {resident.fullName}</li>
+            <li><strong>سن:</strong> {resident.age}</li>
+            <li><strong>جنسیت:</strong> {resident.gender}</li>
           </ul>
         </div>
         <div>
-          <h4 className="font-medium text-slate-900 mb-2">Training Information</h4>
+          <h4 className="font-medium text-slate-900 mb-2">اطلاعات آموزشی</h4>
           <ul className="text-sm text-slate-700 space-y-1">
-            <li><strong>Department:</strong> {resident.department}</li>
-            <li><strong>Start Date:</strong> {new Date(resident.startDate).toLocaleDateString()}</li>
+            <li><strong>دیپارتمنت:</strong> {resident.department}</li>
+            <li><strong>تاریخ شروع:</strong> {new Date(resident.startDate).toLocaleDateString()}</li>
             {resident.endDate && (
-              <li><strong>Expected End Date:</strong> {new Date(resident.endDate).toLocaleDateString()}</li>
+              <li><strong>تاریخ پایان:</strong> {new Date(resident.endDate).toLocaleDateString()}</li>
             )}
           </ul>
         </div>
@@ -109,6 +102,3 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
     </div>
   );
 }
-
-
-

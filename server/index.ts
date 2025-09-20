@@ -4,12 +4,19 @@ import { setupVite, serveStatic, log } from "./vite";
 import { connectDB } from "./db";
 import monographRoutes from "./routes/form-C";
 import conferenceRoutes from "./routes/form-D";
-
+import evaluationFormERoutes from "./routes/form-E";
+import evaluationFormGRoutes from "./routes/form-G";
+import formHRoutes from "./routes/form-H";
+import monographEvaluationRoutes from "./routes/form-k";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/api/monograph", monographRoutes);
 app.use("/api/conference", conferenceRoutes);
+app.use("/api/evaluationFormE", evaluationFormERoutes);
+app.use("/api/evaluationFormH", formHRoutes);
+app.use("/api/evaluationFormG", evaluationFormGRoutes);
+app.use("/api/monographEvaluation", monographEvaluationRoutes);
 
 app.use((req, res, next) => {
   const start = Date.now();

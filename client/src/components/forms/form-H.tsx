@@ -15,17 +15,62 @@ export default function EvaluationFormHStyled() {
   const [shiftDepartment, setShiftDepartment] = useState("");
   const [programDirector, setProgramDirector] = useState("");
   const [presidentSigned, setPresidentSigned] = useState(false);
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/evaluationFormH", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // studentId: "64dfe...", // 👈 یک آی‌دی تستی از Resident اگر داری
+           year: yearInput,
+          residentName,
+          fatherName,
+          department,
+          trainingYear,
+          totalScore: Number(totalScore),
+          averageScore: Number(averageScore),
+          instructorName,
+          instructorSigned,
+          shiftDepartment,
+          programDirector,
+          presidentSigned,
+        }),
+      });
+
+      if (!res.ok) throw new Error("خطا در ذخیره فرم");
+
+      const data = await res.json();
+      console.log("فرم ذخیره شد:", data);
+      alert("فرم با موفقیت ذخیره شد!");
+
+      // 👇 ریست کردن همه فیلدها
+      setYearInput("");
+      setResidentName("");
+      setFatherName("");
+      setDepartment("");
+      setTrainingYear("سال اول");
+      setTotalScore("");
+      setAverageScore("");
+      setInstructorName("");
+      setInstructorSigned(false);
+      setShiftDepartment("");
+      setProgramDirector("");
+      setPresidentSigned(false);
+    } catch (err) {
+      console.error(err);
+      alert("خطا در ذخیره فرم");
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-2xl p-6 mt-6">
-      
       {/* بالای فرم */}
       <div className="text-center mb-2">
         <div className="mt-1 font-semibold">وزارت صحت عامه</div>
         <div className="font-semibold">معینیت اداری</div>
         <div className="font-semibold">ریاست اکمال تخصص</div>
       </div>
-      <hr className="border-t-2 border-gray-300 my-3"/>
+      <hr className="border-t-2 border-gray-300 my-3" />
       <div className="text-center font-semibold mb-4">
         فرم مخصوص درج نمرات سال‌های دوران ترینینگ - شفاخانه ملی و تخصص چشم نور
       </div>
@@ -125,7 +170,11 @@ export default function EvaluationFormHStyled() {
         </div>
         <div className="flex items-center justify-center">
           <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={instructorSigned} onChange={(e) => setInstructorSigned(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={instructorSigned}
+              onChange={(e) => setInstructorSigned(e.target.checked)}
+            />
             امضای استاد
           </label>
         </div>
@@ -155,7 +204,11 @@ export default function EvaluationFormHStyled() {
         </div>
         <div className="flex items-center justify-center">
           <label className="flex items-center space-x-2">
-            <input type="checkbox" checked={presidentSigned} onChange={(e) => setPresidentSigned(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={presidentSigned}
+              onChange={(e) => setPresidentSigned(e.target.checked)}
+            />
             مهر و امضای ریاست
           </label>
         </div>
@@ -163,7 +216,7 @@ export default function EvaluationFormHStyled() {
 
       <div className="text-center">
         <button
-          onClick={() => alert("اطلاعات ذخیره شد")}
+          onClick={handleSubmit}
           className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition"
         >
           ذخیره فرم
