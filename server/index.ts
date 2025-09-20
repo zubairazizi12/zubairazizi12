@@ -62,7 +62,7 @@ app.use((req, res, next) => {
     throw err;
   });
 
-<<<<<<< HEAD
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -73,17 +73,14 @@ app.use((req, res, next) => {
   }
 
 
-=======
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
-  // It is the only port that is not firewalled.
->>>>>>> bdbdc045a0c8c9daccfdc0a4fe4cce85fb316bb9
   const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
     host: "0.0.0.0",
-    // reusePort: true,
   }, async () => {
     log(`serving on port ${port}`);
     
