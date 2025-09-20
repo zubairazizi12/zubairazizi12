@@ -1,3 +1,4 @@
+// ResidentDetailsModal.tsx
 import * as React from "react";
 import {
   Dialog,
@@ -10,9 +11,9 @@ import { Button } from "@/components/ui/button";
 import ResidentDetails from "./resident-details";
 
 interface ResidentDetailsModalProps {
-  residentId: string;
-  isOpen: boolean;
-  onClose: () => void;
+  residentId: string; // آیدی رزیدنت
+  isOpen: boolean;    // باز یا بسته بودن
+  onClose: () => void; // تابع بستن
 }
 
 export default function ResidentDetailsModal({

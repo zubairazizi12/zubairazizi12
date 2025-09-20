@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,32 +28,95 @@ export default function TeacherFormDialog({
   const form = useForm<InsertTeacher>({
     resolver: zodResolver(insertTeacherSchema),
     defaultValues: {
-      name: defaultValues?.name || "",
-      lostname:defaultValues?.lostname || "",
-      fatherName: defaultValues?.fatherName || "",
-      grandfatherName: defaultValues?.grandfatherName || "",
-      academicRank: defaultValues?.academicRank || "",
-      rankAchievementDate: defaultValues?.rankAchievementDate || new Date(),
-      trainerAppointmentDate: defaultValues?.trainerAppointmentDate || new Date(),
-      gender: defaultValues?.gender || "",
-      province: defaultValues?.province || "",
-      subject: defaultValues?.subject || "",
-      position: defaultValues?.position || "",
-      hospital: defaultValues?.hospital || "",
-      dateOfBirth: defaultValues?.dateOfBirth || new Date(),
-      idNumber: defaultValues?.idNumber || "",
-      dutyStartDate: defaultValues?.dutyStartDate || new Date(),
-      contactInfo: defaultValues?.contactInfo || "",
-      whatsappNumber: defaultValues?.whatsappNumber || "",
-      emailAddress: defaultValues?.emailAddress || "",
-      postCode: defaultValues?.postCode || "",
-      appointmentType: defaultValues?.appointmentType || "",
-      department: defaultValues?.department || "",
-      experience: defaultValues?.experience || 0,
-      status: defaultValues?.status || "active",
-      profileImageUrl: defaultValues?.profileImageUrl || "",
+      name: "",
+      lostname: "",
+      fatherName: "",
+      grandfatherName: "",
+      academicRank: "",
+      rankAchievementDate: new Date(),
+      trainerAppointmentDate: new Date(),
+      gender: "",
+      province: "",
+      subject: "",
+      position: "",
+      hospital: "",
+      dateOfBirth: new Date(),
+      idNumber: "",
+      dutyStartDate: new Date(),
+      contactInfo: "",
+      whatsappNumber: "",
+      emailAddress: "",
+      postCode: "",
+      appointmentType: "",
+      department: "",
+      experience: 0,
+      status: "active",
+      profileImageUrl: "",
     },
   });
+
+  // Reset form when dialog opens or defaultValues change
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultValues) {
+        // Editing mode - populate with existing values
+        form.reset({
+          name: defaultValues.name || "",
+          lostname: defaultValues.lostname || "",
+          fatherName: defaultValues.fatherName || "",
+          grandfatherName: defaultValues.grandfatherName || "",
+          academicRank: defaultValues.academicRank || "",
+          rankAchievementDate: defaultValues.rankAchievementDate || new Date(),
+          trainerAppointmentDate: defaultValues.trainerAppointmentDate || new Date(),
+          gender: defaultValues.gender || "",
+          province: defaultValues.province || "",
+          subject: defaultValues.subject || "",
+          position: defaultValues.position || "",
+          hospital: defaultValues.hospital || "",
+          dateOfBirth: defaultValues.dateOfBirth || new Date(),
+          idNumber: defaultValues.idNumber || "",
+          dutyStartDate: defaultValues.dutyStartDate || new Date(),
+          contactInfo: defaultValues.contactInfo || "",
+          whatsappNumber: defaultValues.whatsappNumber || "",
+          emailAddress: defaultValues.emailAddress || "",
+          postCode: defaultValues.postCode || "",
+          appointmentType: defaultValues.appointmentType || "",
+          department: defaultValues.department || "",
+          experience: defaultValues.experience || 0,
+          status: defaultValues.status || "active",
+          profileImageUrl: defaultValues.profileImageUrl || "",
+        });
+      } else {
+        // Add mode - reset to empty values
+        form.reset({
+          name: "",
+          lostname: "",
+          fatherName: "",
+          grandfatherName: "",
+          academicRank: "",
+          rankAchievementDate: new Date(),
+          trainerAppointmentDate: new Date(),
+          gender: "",
+          province: "",
+          subject: "",
+          position: "",
+          hospital: "",
+          dateOfBirth: new Date(),
+          idNumber: "",
+          dutyStartDate: new Date(),
+          contactInfo: "",
+          whatsappNumber: "",
+          emailAddress: "",
+          postCode: "",
+          appointmentType: "",
+          department: "",
+          experience: 0,
+          status: "active",
+          profileImageUrl: "",
+        });
+      }
+    }
+  }, [isOpen, defaultValues, form]);
 
   const handleSubmit = (data: InsertTeacher) => {
     console.log('Form submission data:', data);
@@ -161,7 +225,7 @@ export default function TeacherFormDialog({
 
               <div>
                 <Label htmlFor="gender">جنسیت</Label>
-                <Select onValueChange={(value) => form.setValue("gender", value)}>
+                <Select value={form.watch("gender")} onValueChange={(value) => form.setValue("gender", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="جنسیت را انتخاب کنید" />
                   </SelectTrigger>
@@ -402,7 +466,7 @@ export default function TeacherFormDialog({
 
               <div>
               <Label htmlFor="status">وضعیت فعلی</Label>
-              <Select onValueChange={(value) => form.setValue("status", value)}>
+              <Select value={form.watch("status")} onValueChange={(value) => form.setValue("status", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="وضعیت فعلی را انتخاب کنید" />
                 </SelectTrigger>

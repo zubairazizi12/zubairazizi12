@@ -3,10 +3,16 @@ import { createServer, type Server } from "http";
 import { setupDemoAuth, isDemoAuthenticated } from "./demoAuth";
 import { UserController, ResidentController, TeacherController } from "./controllers";
 import { TeacherModel } from "./models";
+import { trainerRoutes } from '../server/routes/trainerRoutes';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Demo Auth middleware
   await setupDemoAuth(app);
+//////////////////////////////////////
+//tranerRoters
+  app.use('/api/trainers', trainerRoutes);
+
+  ///////////////////////////////////////////
 
   // Auth routes
   app.get('/api/auth/user', isDemoAuthenticated, UserController.getCurrentUser);
