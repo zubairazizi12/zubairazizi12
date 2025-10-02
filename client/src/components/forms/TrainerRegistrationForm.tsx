@@ -7,6 +7,7 @@ import { X } from "lucide-react"; // آیکن ضربدر برای بستن
 // Dependencies: react, react-dom, react-hook-form, tailwindcss (optional)
 
 type FormValues = {
+  id: string;
   name: string;
   lastName: string;
   parentType: "ولد" | "بنت" | string; // allow free text for flexibility
@@ -44,6 +45,7 @@ export default function TrainerRegistrationForm({
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
+      id: "",
       name: "",
       lastName: "",
       parentType: "",
@@ -79,19 +81,17 @@ export default function TrainerRegistrationForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error response from server:", errorData);
         alert("خطا در ثبت فرم: " + (errorData.message || "اطلاعات نادرست"));
         return;
       }
 
       const savedTrainer = await response.json();
-      console.log("Trainer saved:", savedTrainer);
-      alert("فرم با موفقیت ثبت شد!");
+      alert("ترینر با موفقیت ثبت شد!");
       reset();
-      onClose(); // فرم را بعد از ذخیره موفق ببند
+      onClose(); // فرم بسته شود
     } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("خطا در ثبت فرم: لطفاً دوباره تلاش کنید.");
+      console.error(error);
+      alert("خطا در ثبت فرم، دوباره تلاش کنید.");
     }
   };
 
@@ -113,6 +113,19 @@ export default function TrainerRegistrationForm({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="flex flex-col">
+              <span className="text-sm">ایدی</span>
+              <input
+                {...register("id", { required: "ایدی لازم است" })}
+                className="mt-1 p-2 border rounded-md focus:outline-none focus:ring-2"
+                placeholder="ایدی را وارد کنید."
+              />
+              {errors.name && (
+                <span className="text-red-600 text-sm">
+                  {errors.name.message}
+                </span>
+              )}
+            </label>
             <label className="flex flex-col">
               <span className="text-sm">اسم</span>
               <input

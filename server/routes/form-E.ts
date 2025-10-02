@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createEvaluationFormE,
+  getAllEvaluationFormsE,
   getEvaluationFormsByResident,
   getEvaluationFormEById,
   updateEvaluationFormE,
@@ -9,9 +10,12 @@ import {
 
 const router = express.Router();
 
+
+
 // ایجاد فرم جدید
 router.post("/", createEvaluationFormE);
-
+// گرفتن تمام فرم‌ها بدون فیلتر
+router.get("/", getAllEvaluationFormsE);
 // تمام فرم‌های یک Resident خاص
 router.get("/resident/:residentId", getEvaluationFormsByResident);
 

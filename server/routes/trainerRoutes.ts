@@ -1,58 +1,64 @@
-import express from 'express';
-import { Trainer } from '../models/Trainers';
-import { z } from 'zod';
-import { isDemoAuthenticated } from '../demoAuth';
+import express, { Request, Response } from "express";
+import Trainer, { ITrainer } from "../models/trainerModel";
 
 const router = express.Router();
 
-// Validation schema
-const createTrainerSchema = z.object({
-  name: z.string().min(1),
-  lastName: z.string().min(1),
-  parentType: z.string().optional(),
-  parentName: z.string().optional(),
-  gender: z.string(),
-  province: z.string(),
-  department: z.string(),
-  specialty: z.string(),
-  hospital: z.string().optional(),
-  joiningDate: z.string(),
-  trainingYear: z.string().optional(),
-  supervisorName: z.string().optional(),
-  birthDate: z.string(),
-  idNumber: z.string(),
-  phoneNumber: z.string(),
-  whatsappNumber: z.string().optional(),
-  email: z.string().email(),
-  postNumberAndCode: z.string().optional(),
-  appointmentType: z.string().optional(),
-  status: z.string().optional(),
-});
-
-// 👆 Create trainer
-router.post('/', isDemoAuthenticated, async (req, res) => {
+// Create Trainer
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const validatedData = createTrainerSchema.parse(req.body);
-    const trainer = new Trainer(validatedData);
-    const savedTrainer = await trainer.save();
+    const newTrainer = new Trainer(req.body);
+    const savedTrainer = await newTrainer.save();
     res.status(201).json(savedTrainer);
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ errors: error.errors });
-    }
-    console.error('Error creating trainer:', error);
-    res.status(500).json({ message: 'Failed to create trainer' });
+    console.error("Error creating trainer:", error);
+    res.status(500).json({ message: "خطا در ثبت ترینر" });
   }
 });
 
-// 👆 Get all trainers
-router.get('/', async (req, res) => {
+// Get all Trainers
+router.get("/", async (_req: Request, res: Response) => {
   try {
     const trainers = await Trainer.find().lean();
     res.status(200).json(trainers);
   } catch (error) {
-    console.error('Error fetching trainers:', error);
-    res.status(500).json({ message: 'Failed to fetch trainers' });
+    console.error("Error fetching trainers:", error);
+    res.status(500).json({ message: "خطا در دریافت ترینرها" });
+  }
+});
+
+// Get Trainer by ID
+router.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const trainer = await Trainer.findById(req.params.id).lean();
+    if (!trainer) return res.status(404).json({ message: "ترینر یافت نشد" });
+    res.status(200).json(trainer);
+  } catch (error) {
+    console.error("Error fetching trainer:", error);
+    res.status(500).json({ message: "خطا در دریافت ترینر" });
+  }
+});
+
+// Update Trainer by ID
+router.put("/:id", async (req: Request, res: Response) => {
+  try {
+    const updatedTrainer = await Trainer.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedTrainer) return res.status(404).json({ message: "ترینر یافت نشد" });
+    res.status(200).json(updatedTrainer);
+  } catch (error) {
+    console.error("Error updating trainer:", error);
+    res.status(500).json({ message: "خطا در بروزرسانی ترینر" });
+  }
+});
+
+// Delete Trainer by ID
+router.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const deletedTrainer = await Trainer.findByIdAndDelete(req.params.id);
+    if (!deletedTrainer) return res.status(404).json({ message: "ترینر یافت نشد" });
+    res.status(200).json({ message: "ترینر حذف شد" });
+  } catch (error) {
+    console.error("Error deleting trainer:", error);
+    res.status(500).json({ message: "خطا در حذف ترینر" });
   }
 });
 

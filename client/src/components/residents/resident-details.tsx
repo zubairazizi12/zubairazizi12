@@ -1,8 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import type { Resident } from "@shared/schema";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+// فرم‌های شما همان قبلی می‌مانند:
+import FormCDetails from "@/components/residents/form-details/formC-detail";
+import FormDDetails from "@/components/residents/form-details/formD-detail";
+import FormEDetails from "@/components/residents/form-details/formE-detail";
+import FormGDetails from "@/components/residents/form-details/formG-detail";
+import FormHDetails from "@/components/residents/form-details/formH-detail";
 
+// تعریف انواع فرم‌ها
 const FORM_TYPES = [
   { type: "J", name: "Initial Assessment" },
   { type: "F", name: "Mid-Training Evaluation" },
@@ -15,22 +28,27 @@ const FORM_TYPES = [
   { type: "K", name: "Final Competency" },
 ];
 
-interface ResidentDetailsProps {
-  residentId: string;
+interface TrainerDetailsProps {
+  trainerId: string;
   onClose: () => void;
 }
 
-export default function ResidentDetails({ residentId, onClose }: ResidentDetailsProps) {
-  const { data: resident, isLoading } = useQuery<Resident>({
-    queryKey: ["/api/residents", residentId],
+// این همان ResidentDetails ولی برای Trainer
+export default function TrainerDetails({ trainerId, onClose }: TrainerDetailsProps) {
+  const [selectedForm, setSelectedForm] = useState<string | null>(null);
+
+  // اینجا از API ترینر استفاده می‌کنیم
+  const { data: trainer, isLoading } = useQuery({
+    queryKey: ["/api/trainers", trainerId],
+    queryFn: () => fetch(`/api/trainers/${trainerId}`).then((r) => r.json()),
   });
 
   if (isLoading) return <div>در حال بارگذاری...</div>;
-  if (!resident) return <div>رزیدنت پیدا نشد.</div>;
+  if (!trainer) return <div>ترینر پیدا نشد.</div>;
 
   return (
     <div className="relative bg-white rounded-lg shadow-lg border border-slate-200 p-6">
-      {/* Close button */}
+      {/* دکمه بستن */}
       <Button
         variant="ghost"
         size="sm"
@@ -40,13 +58,13 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
         <X className="h-4 w-4" />
       </Button>
 
-      {/* Top row: Photo + Form Buttons + Actions */}
+      {/* ردیف بالا: عکس + دکمه فرم‌ها + اکشن */}
       <div className="flex items-center justify-between mb-4 w-full">
         <div className="flex-shrink-0 w-24 h-24 rounded-full border border-slate-300 overflow-hidden">
-          {resident.profileImageUrl ? (
+          {trainer.profileImageUrl ? (
             <img
-              src={resident.profileImageUrl}
-              alt={resident.fullName}
+              src={trainer.profileImageUrl}
+              alt={`${trainer.name} ${trainer.lastName}`}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -60,7 +78,14 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
           {FORM_TYPES.map((ft) => (
             <Button
               key={ft.type}
-              className="w-16 h-16 rounded-full flex items-center justify-center text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+              onClick={() => setSelectedForm(ft.type)}
+              className={`w-16 h-16 rounded-full flex items-center justify-center text-sm font-semibold
+                ${
+                  selectedForm === ft.type
+                    ? "bg-blue-500 text-white"
+                    : "bg-slate-100 text-slate-700"
+                }
+                hover:bg-slate-200 transition`}
               title={ft.name}
             >
               {ft.type}
@@ -69,36 +94,69 @@ export default function ResidentDetails({ residentId, onClose }: ResidentDetails
         </div>
 
         <div className="flex-shrink-0">
-          <Button
-            size="sm"
-            className="bg-red-500 text-white hover:bg-red-600"
-          >
+          <Button size="sm" className="bg-red-500 text-white hover:bg-red-600">
             Disciplinary Actions
           </Button>
         </div>
       </div>
 
-      {/* Resident Information */}
+      {/* اطلاعات ترینر */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-200 pt-4 mt-4">
         <div>
           <h4 className="font-medium text-slate-900 mb-2">اطلاعات شخصی</h4>
           <ul className="text-sm text-slate-700 space-y-1">
-            <li><strong>نام کامل:</strong> {resident.fullName}</li>
-            <li><strong>سن:</strong> {resident.age}</li>
-            <li><strong>جنسیت:</strong> {resident.gender}</li>
+            <li>
+              <strong>نام کامل:</strong> {trainer.name} {trainer.lastName}
+            </li>
+            <li>
+              <strong>جنسیت:</strong> {trainer.gender}
+            </li>
+            <li>
+              <strong>شماره تماس:</strong> {trainer.phoneNumber}
+            </li>
           </ul>
         </div>
         <div>
           <h4 className="font-medium text-slate-900 mb-2">اطلاعات آموزشی</h4>
           <ul className="text-sm text-slate-700 space-y-1">
-            <li><strong>دیپارتمنت:</strong> {resident.department}</li>
-            <li><strong>تاریخ شروع:</strong> {new Date(resident.startDate).toLocaleDateString()}</li>
-            {resident.endDate && (
-              <li><strong>تاریخ پایان:</strong> {new Date(resident.endDate).toLocaleDateString()}</li>
-            )}
+            <li>
+              <strong>دیپارتمنت:</strong> {trainer.department}
+            </li>
+            <li>
+              <strong>تاریخ شروع:</strong> {trainer.joiningDate}
+            </li>
+            <li>
+              <strong>سال آموزشی:</strong> {trainer.trainingYear}
+            </li>
           </ul>
         </div>
       </div>
+
+      {/* دیالوگ برای فرم */}
+      <Dialog open={!!selectedForm} onOpenChange={() => setSelectedForm(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>جزئیات فرم {selectedForm}</DialogTitle>
+          </DialogHeader>
+
+          {selectedForm === "C" && (
+            <FormCDetails residentId={trainerId} onClose={() => setSelectedForm(null)} />
+          )}
+          {selectedForm === "D" && (
+            <FormDDetails residentId={trainerId} onClose={() => setSelectedForm(null)} />
+          )}
+          {selectedForm === "E" && (
+            <FormEDetails residentId={trainerId} onClose={() => setSelectedForm(null)} />
+          )}
+          {selectedForm === "G" && (
+            <FormGDetails residentId={trainerId} onClose={() => setSelectedForm(null)} />
+          )}
+          {selectedForm === "H" && (
+            <FormHDetails residentId={trainerId} onClose={() => setSelectedForm(null)} />
+          )}
+          {/* بقیه فرم‌ها را هم مشابه اضافه کنید */}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

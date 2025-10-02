@@ -8,9 +8,14 @@ import evaluationFormERoutes from "./routes/form-E";
 import evaluationFormGRoutes from "./routes/form-G";
 import formHRoutes from "./routes/form-H";
 import monographEvaluationRoutes from "./routes/form-k";
+
 const app = express();
+
+// Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// API routes
 app.use("/api/monograph", monographRoutes);
 app.use("/api/conference", conferenceRoutes);
 app.use("/api/evaluationFormE", evaluationFormERoutes);
@@ -18,6 +23,7 @@ app.use("/api/evaluationFormH", formHRoutes);
 app.use("/api/evaluationFormG", evaluationFormGRoutes);
 app.use("/api/monographEvaluation", monographEvaluationRoutes);
 
+// Logging middleware for API responses
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -36,11 +42,9 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
-
       log(logLine);
     }
   });
@@ -48,52 +52,42 @@ app.use((req, res, next) => {
   next();
 });
 
+// Error handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
+});
+
+// ---- Main bootstrap ----
 (async () => {
-  // Initialize database connection
+  // DB
   await connectDB();
-  
+
+  // registerRoutes returns http.Server usually
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
+  // در حالت production فایل‌های استاتیک را سرو کن
+  if (app.get("env") !== "development") {
     serveStatic(app);
   }
 
+  // Listen
+  const port = parseInt(process.env.PORT || "5000", 10);
+  server.listen(
+    { port, host: "0.0.0.0" },
+    async () => {
+      log(`serving on port ${port}`);
 
-
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-  }, async () => {
-    log(`serving on port ${port}`);
-    
-    // Setup vite after server is listening to avoid deadlock
-    if (app.get("env") === "development") {
-      try {
-        await setupVite(app, server);
-        log("Vite development server setup complete");
-      } catch (error) {
-        console.error("Vite setup failed:", error);
+      // فقط در حالت dev یک بار setupVite را اجرا کن
+      if (app.get("env") === "development") {
+        try {
+          await setupVite(app, server);
+          log("Vite development server setup complete");
+        } catch (error) {
+          console.error("Vite setup failed:", error);
+        }
       }
-    } else {
-      serveStatic(app);
     }
-  });
+  );
 })();

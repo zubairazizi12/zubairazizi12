@@ -48,8 +48,8 @@ export default function TeacherFormDialog({
       emailAddress: "",
       postCode: "",
       appointmentType: "",
-      department: "",
-      experience: 0,
+      // department: "",
+      // experience: 0,
       status: "active",
       profileImageUrl: "",
     },
@@ -81,8 +81,8 @@ export default function TeacherFormDialog({
           emailAddress: defaultValues.emailAddress || "",
           postCode: defaultValues.postCode || "",
           appointmentType: defaultValues.appointmentType || "",
-          department: defaultValues.department || "",
-          experience: defaultValues.experience || 0,
+          // department: defaultValues.department || "",
+          // experience: defaultValues.experience || 0,
           status: defaultValues.status || "active",
           profileImageUrl: defaultValues.profileImageUrl || "",
         });
@@ -109,8 +109,8 @@ export default function TeacherFormDialog({
           emailAddress: "",
           postCode: "",
           appointmentType: "",
-          department: "",
-          experience: 0,
+          // department: "",
+          // experience: 0,
           status: "active",
           profileImageUrl: "",
         });
@@ -123,6 +123,10 @@ export default function TeacherFormDialog({
     console.log('Form errors:', form.formState.errors);
     onSubmit(data);
   };
+
+
+
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -439,7 +443,7 @@ export default function TeacherFormDialog({
 </div>
 
 
-              <div>
+              {/* <div>
                 <Label htmlFor="department">ریاست</Label>
                 <Input
                   id="department"
@@ -462,7 +466,11 @@ export default function TeacherFormDialog({
                 {form.formState.errors.experience && (
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.experience.message}</p>
                 )}
-              </div>
+              </div> */}
+
+
+
+
 
               <div>
               <Label htmlFor="status">وضعیت فعلی</Label>
@@ -480,6 +488,42 @@ export default function TeacherFormDialog({
                 <p className="text-red-500 text-sm mt-1">{form.formState.errors.status.message}</p>
               )}
             </div>
+
+
+              {/* عکس پروفایل */}
+<div>
+  <Label htmlFor="profileImageUrl">عکس پروفایل</Label>
+<Input
+  id="profileImageUrl"
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      form.setValue("profileImageUrl", url);
+    } else {
+      form.setValue("profileImageUrl", ""); // مقدار خالی اگر فایلی انتخاب نشده
+    }
+  }}
+/>
+
+  {form.watch("profileImageUrl") && (
+    <img
+      src={form.watch("profileImageUrl")}
+      alt="Profile Preview"
+      className="mt-2 w-24 h-24 object-cover rounded-full border"
+    />
+  )}
+  {form.formState.errors.profileImageUrl && (
+    <p className="text-red-500 text-sm mt-1">
+      {form.formState.errors.profileImageUrl.message}
+    </p>
+  )}
+</div>
+
+
+
             </div>
           </div>
 

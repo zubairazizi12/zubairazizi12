@@ -13,12 +13,27 @@ export const createEvaluationFormE = async (req: Request, res: Response) => {
   }
 };
 
+// گرفتن تمام فرم‌ها بدون فیلتر
+export const getAllEvaluationFormsE = async (req: Request, res: Response) => {
+  try {
+    const forms = await EvaluationFormE.find().populate("residentId");
+    res.json(forms);
+  } catch (error) {
+    res.status(500).json({ message: "خطا در گرفتن تمام فرم‌ها", error });
+  }
+};
+
 // گرفتن تمام فرم‌ها برای یک Resident خاص
-export const getEvaluationFormsByResident = async (req: Request, res: Response) => {
+export const getEvaluationFormsByResident = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { residentId } = req.params;
     // جستجو بر اساس residentId
-    const forms = await EvaluationFormE.find({ residentId }).populate("residentId");
+    const forms = await EvaluationFormE.find({ residentId }).populate(
+      "residentId"
+    );
     res.json(forms);
   } catch (error) {
     res.status(500).json({ message: "خطا در گرفتن فرم‌ها", error });

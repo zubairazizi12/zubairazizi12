@@ -77,7 +77,7 @@ export default function Sidebar() {
             
             return (
               <Link key={item.name} href={item.href}>
-                <a className={cn(
+                <div className={cn(
                   "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                   isActive
                     ? "bg-hospital-green-50 text-hospital-green-700"
@@ -85,7 +85,7 @@ export default function Sidebar() {
                 )} data-testid={`link-${item.name.toLowerCase()}`}>
                   <Icon className="ml-3 h-5 w-5" />
                   {item.name}
-                </a>
+                </div>
               </Link>
             );
           })}

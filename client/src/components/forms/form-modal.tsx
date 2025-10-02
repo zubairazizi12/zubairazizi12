@@ -36,6 +36,7 @@ const FORM_TITLES: Record<string, string> = {
 };
 
 export default function FormModal({ form, onClose }: FormModalProps) {
+   if (!form) return null; // ← اینجا اضافه کنید
   const { user } = useAuth();
   const [formData, setFormData] = useState(form.formData as any || {});
 

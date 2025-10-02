@@ -25,19 +25,23 @@ export class MonographController {
   }
 
   // دریافت تمام فرم‌ها
-  static async getAllForms(req: Request, res: Response) {
-    try {
-      const forms = await MonographEvaluationForm.find().sort({ createdAt: -1 });
-      res.status(200).json({
-        success: true,
-        data: forms
-      });
-    } catch (error: any) {
-      console.error('Error fetching forms:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطا در دریافت داده‌ها'
-      });
-    }
+// controllers/monographController.ts
+static async getAllForms(req: Request, res: Response) {
+  try {
+    // فعلاً همه‌ی فرم‌ها را می‌گیریم
+    const forms = await MonographEvaluationForm.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: forms
+    });
+  } catch (error: any) {
+    console.error('Error fetching forms:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطا در دریافت داده‌ها'
+    });
   }
+}
+
 }

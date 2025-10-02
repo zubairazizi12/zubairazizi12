@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IConferenceEvaluation extends Document {
+  residentId: mongoose.Types.ObjectId;
   year: string;
   name: string;
   fatherName: string;
@@ -18,6 +19,11 @@ export interface IConferenceEvaluation extends Document {
 }
 
 const ConferenceEvaluationSchema: Schema = new Schema({
+   residentId: {
+    type: Schema.Types.ObjectId,
+    ref: "Resident",  // 👈 به مدل Resident
+    required: false,  // 👈 فعلاً الزامی نیست
+  },
   year: { type: String, required: true },
   name: { type: String, required: true },
   fatherName: { type: String, required: true },
